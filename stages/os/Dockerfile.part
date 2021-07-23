@@ -1,0 +1,28 @@
+RUN locale-gen
+ENV LC_ALL C
+
+RUN rm -f /etc/localtime \
+	&& ln -s "/usr/share/zoneinfo/Etc/UTC" /etc/localtime
+
+RUN pacman-key --init \
+	&& pacman-key --populate archlinuxarm
+
+RUN sed -i -e "s/^CheckSpace/#!!!CheckSpace/g" /etc/pacman.conf
+
+RUN pacman --noconfirm -Syy \
+	&& pacman --needed --noconfirm -S \
+		glibc \
+		pacman \
+	&& pacman-db-upgrade \
+	&& pacman --noconfirm -Syu \
+	&& pacman --ask=4 --needed --noconfirm -S linux-raspberrypi4 raspberrypi-bootloader raspberrypi-bootloader-x \
+	&& rm -rf /var/cache/pacman/pkg/*
+
+COPY stages/os/bashrc /tmp/linux-profile/.bashrc
+COPY stages/os/bash_profile /tmp/linux-profile/.bash_profile
+COPY stages/os/bash_logout /tmp/linux-profile/.bash_logout
+RUN cp -a /tmp/linux-profile/{.bash_profile,.bashrc,.bash_logout} /etc/skel \
+	&& cp -a /tmp/linux-profile/{.bash_profile,.bashrc,.bash_logout} /root \
+	&& cp -a /tmp/linux-profile/{.bash_profile,.bashrc,.bash_logout} /home/alarm \
+	&& chown -R alarm:alarm /home/alarm/{.bash_profile,.bashrc,.bash_logout} \
+	&& rm -rf /tmp/linux-profile
