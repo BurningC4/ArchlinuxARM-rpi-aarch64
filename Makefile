@@ -49,7 +49,6 @@ _TMP_DIR = ./.tmp
 _BUILD_DIR = ./.build
 _BUILDED_IMAGE_CONFIG = ./.builded.conf
 
-_QEMU_GUEST_ARCH = aarch64
 _QEMU_STATIC_BASE_URL = https://deb.debian.org/debian/pool/main/q/qemu
 _QEMU_COLLECTION = qemu
 _QEMU_STATIC = $(_QEMU_COLLECTION)/qemu-aarch64-static
@@ -65,7 +64,6 @@ _RPI_RESULT_ROOTFS = $(_TMP_DIR)/result-rootfs
 _CARD_P = $(if $(findstring mmcblk,$(CARD)),p,$(if $(findstring loop,$(CARD)),p,))
 _CARD_BOOT = $(CARD)$(_CARD_P)1
 _CARD_ROOTFS = $(CARD)$(_CARD_P)2
-_CARD_DATA = $(CARD)$(_CARD_P)3
 
 
 # =====
@@ -291,8 +289,7 @@ format: $(__DEP_TOOLBOX)
 		&& set -e \
 		&& parted $(CARD) -s mklabel msdos \
 		&& parted $(CARD) -a optimal -s mkpart primary fat32 $(if $(findstring generic,rpi4),32MiB,0) 256MiB \
-		&& parted $(CARD) -a optimal -s mkpart primary ext4 256MiB $(if $(CARD_DATA_FS_TYPE),$(CARD_DATA_BEGIN_AT),100%) \
-		&& $(if $(CARD_DATA_FS_TYPE),parted $(CARD) -a optimal -s mkpart primary $(CARD_DATA_FS_TYPE) $(CARD_DATA_BEGIN_AT) 100%,/bin/true) \
+		&& parted $(CARD) -a optimal -s mkpart primary ext4 256MiB 100% \
 		&& partprobe $(CARD) \
 	"
 	$(__DOCKER_RUN_TMP_PRIVILEGED) bash -c " \
@@ -300,7 +297,6 @@ format: $(__DEP_TOOLBOX)
 		&& set -e \
 		&& yes | mkfs.vfat $(_CARD_BOOT) \
 		&& yes | mkfs.ext4 $(_CARD_ROOTFS) \
-		&& $(if $(CARD_DATA_FS_TYPE),yes | mkfs.$(CARD_DATA_FS_TYPE) $(CARD_DATA_FS_FLAGS) $(_CARD_DATA),/bin/true) \
 	"
 	$(call say,"Format complete")
 
