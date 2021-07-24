@@ -20,7 +20,7 @@ jobs:
       - name: Git push assets to "release" branch
         run: |
           cd release || exit 1
-          apt install git-lfs
+          sudo apt install git-lfs
           git lfs install
           git init
           git config --local user.name "${{ github.actor }}"
