@@ -202,7 +202,7 @@ $(_QEMU_COLLECTION):
 
 # =====
 clean:
-	rm -rf $(_BUILD_DIR) $(_BUILDED_IMAGE_CONFIG)
+	rm -rf $(_BUILD_DIR) $(_BUILDED_IMAGE_CONFIG) release
 
 
 __DOCKER_RUN_TMP = docker run \
@@ -247,4 +247,4 @@ package: extract
 	sudo tar --numeric-owner -czf ./release/ArchLinuxARM-rpi-4-aarch64-latest.tar.gz -C $(_RPI_RESULT_ROOTFS)/ .
 
 .PHONY: toolbox
-.NOTPARALLEL: clean-all install
+.NOTPARALLEL: clean-all package
