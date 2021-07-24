@@ -1,38 +1,9 @@
-# ========================================================================== #
-#                                                                            #
-#    pi-builder - extensible tool to build Arch Linux ARM for Raspberry Pi   #
-#                 on x86_64 host using Docker.                               #
-#                                                                            #
-#    Copyright (C) 2019  Maxim Devaev <mdevaev@gmail.com>                    #
-#                                                                            #
-#    This program is free software: you can redistribute it and/or modify    #
-#    it under the terms of the GNU General Public License as published by    #
-#    the Free Software Foundation, either version 3 of the License, or       #
-#    (at your option) any later version.                                     #
-#                                                                            #
-#    This program is distributed in the hope that it will be useful,         #
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of          #
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the           #
-#    GNU General Public License for more details.                            #
-#                                                                            #
-#    You should have received a copy of the GNU General Public License       #
-#    along with this program.  If not, see <https://www.gnu.org/licenses/>.  #
-#                                                                            #
-# ========================================================================== #
-
-
--include config.mk
-
 PROJECT ?= common
 STAGES ?= __init__ os __cleanup__
 
 HOSTNAME ?= alarm
-LOCALE ?= en_US
-TIMEZONE ?= UTC
 REPO_URL = http://mirror.archlinuxarm.org
 BUILD_OPTS ?=
-
-CARD ?= /dev/loop0
 
 QEMU_PREFIX ?= /usr
 QEMU_RM ?= 1
@@ -57,10 +28,6 @@ _RPI_BASE_IMAGE = $(_IMAGES_PREFIX)-base-rpi4
 _RPI_RESULT_IMAGE = $(PROJECT)-$(_IMAGES_PREFIX)-result-rpi4
 _RPI_RESULT_ROOTFS_TAR = $(_TMP_DIR)/result-rootfs.tar
 _RPI_RESULT_ROOTFS = $(_TMP_DIR)/result-rootfs
-
-_CARD_P = $(if $(findstring mmcblk,$(CARD)),p,$(if $(findstring loop,$(CARD)),p,))
-_CARD_BOOT = $(CARD)$(_CARD_P)1
-_CARD_ROOTFS = $(CARD)$(_CARD_P)2
 
 
 # =====
@@ -96,8 +63,6 @@ $(call say,"Running configuration")
 @ echo "    HOSTNAME   = $(HOSTNAME)"
 @ echo "    REPO_URL   = $(REPO_URL)"
 @ echo
-@ echo "    CARD = $(CARD)"
-@ echo
 @ echo "    QEMU_PREFIX = $(QEMU_PREFIX)"
 @ echo "    QEMU_RM     = $(QEMU_RM)"
 endef
@@ -121,15 +86,10 @@ all:
 	@ echo "    make toolbox             # Build the toolbox image"
 	@ echo "    make binfmt              # Configure ARM binfmt on the host system"
 	@ echo "    make clean               # Remove the generated rootfs"
-	@ echo "    make format              # Format $(CARD)"
-	@ echo "    make install             # Install rootfs to partitions on $(CARD)"
 	@ echo "    make package             # Package image"
 	@ echo
 	$(call show_running_config)
 	@ echo
-
-
-rpi rpi2 rpi3 rpi4 zero zerow generic: os
 
 
 run: $(__DEP_BINFMT)
@@ -268,26 +228,6 @@ clean-all: $(__DEP_TOOLBOX) clean
 	rm -rf $(_TMP_DIR)
 
 
-format: $(__DEP_TOOLBOX)
-	$(call check_build)
-	$(call say,"Formatting $(CARD)")
-	$(__DOCKER_RUN_TMP_PRIVILEGED) bash -c " \
-		set -x \
-		&& set -e \
-		&& parted $(CARD) -s mklabel msdos \
-		&& parted $(CARD) -a optimal -s mkpart primary fat32 2048 200MiB \
-		&& parted $(CARD) -a optimal -s mkpart primary ext4 200MiB 100% \
-		&& partprobe $(CARD) \
-	"
-	$(__DOCKER_RUN_TMP_PRIVILEGED) bash -c " \
-		set -x \
-		&& set -e \
-		&& yes | mkfs.vfat $(_CARD_BOOT) \
-		&& yes | mkfs.ext4 $(_CARD_ROOTFS) \
-	"
-	$(call say,"Format complete")
-
-
 extract: os $(__DEP_TOOLBOX)
 	$(call check_build)
 	$(call say,"Extracting image from Docker")
@@ -301,24 +241,10 @@ extract: os $(__DEP_TOOLBOX)
 	$(call say,"Extraction complete")
 
 
-install: extract format
-	$(call say,"Installing to $(CARD)")
-	$(__DOCKER_RUN_TMP_PRIVILEGED) bash -c " \
-		mkdir -p mnt/boot mnt/rootfs \
-		&& mount $(_CARD_BOOT) mnt/boot \
-		&& mount $(_CARD_ROOTFS) mnt/rootfs \
-		&& rsync -a --info=progress2 $(_RPI_RESULT_ROOTFS)/boot/* mnt/boot \
-		&& rsync -a --info=progress2 $(_RPI_RESULT_ROOTFS)/* mnt/rootfs --exclude boot \
-		&& mkdir mnt/rootfs/boot \
-		&& umount mnt/boot mnt/rootfs \
-	"
-	$(call say,"Installation complete")
-
-
 package: extract
 	$(call say,"Packaging to tar.gz")
 	mkdir ./release
-	sudo tar -czf ./release/ArchLinuxARM-rpi4-aarch64-latest.tar.gz -C $(_RPI_RESULT_ROOTFS)/ .
+	sudo tar --numeric-owner -czf ./release/ArchLinuxARM-rpi-4-aarch64-latest.tar.gz -C $(_RPI_RESULT_ROOTFS)/ .
 
 .PHONY: toolbox
 .NOTPARALLEL: clean-all install

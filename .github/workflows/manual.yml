@@ -23,7 +23,7 @@ jobs:
       - name: build package
         run:  make package
       - name: Generate sha256 hash
-        run:  sha256sum ./release/ArchLinuxARM-rpi4-aarch64-latest.tar.gz > ./release/ArchLinuxARM-rpi4-aarch64-latest.tar.gz.sha256sum
+        run:  sha256sum ./release/ArchLinuxARM-rpi-4-aarch64-latest.tar.gz > ./release/ArchLinuxARM-rpi-4-aarch64-latest.tar.gz.sha256sum
       - name: Git push assets to "release" branch
         run: |
           cd release || exit 1
@@ -32,10 +32,10 @@ jobs:
           git init
           git config --local user.name "${{ github.actor }}"
           git config --local user.email "${{ github.actor }}@users.noreply.github.com"
-          git lfs track "ArchLinuxARM-rpi4-aarch64-latest.tar.gz"
+          git lfs track "ArchLinuxARM-rpi-4-aarch64-latest.tar.gz"
           git add .gitattributes
           git checkout -b release
-          git add ArchLinuxARM-rpi4-aarch64-latest.tar.gz ArchLinuxARM-rpi4-aarch64-latest.tar.gz.sha256sum
+          git add ArchLinuxARM-rpi-4-aarch64-latest.tar.gz ArchLinuxARM-rpi-4-aarch64-latest.tar.gz.sha256sum
           git commit -m "${{ env.RELEASE_NAME }}"
           git remote add ArchlinuxARM-rpi4-aarch64-builder "https://${{ github.actor }}:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}"
           git push -f -u ArchlinuxARM-rpi4-aarch64-builder release
