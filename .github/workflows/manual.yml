@@ -20,9 +20,13 @@ jobs:
       - name: Git push assets to "release" branch
         run: |
           cd release || exit 1
+          apt install git-lfs
+          git lfs install
           git init
           git config --local user.name "${{ github.actor }}"
           git config --local user.email "${{ github.actor }}@users.noreply.github.com"
+          git lfs track "ArchLinuxARM-rpi4-aarch64-latest.tar.gz"
+          git add .gitattributes
           git checkout -b release
           git add ArchLinuxARM-rpi4-aarch64-latest.tar.gz ArchLinuxARM-rpi4-aarch64-latest.tar.gz.sha256sum
           git commit -m "${{ env.RELEASE_NAME }}"
