@@ -1,0 +1,5 @@
+/.mnt/
+/.tmp/
+/.build/
+/release/
+/.builded.conf
