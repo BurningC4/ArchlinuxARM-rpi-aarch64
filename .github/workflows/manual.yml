@@ -2,6 +2,13 @@ name: Build rpi4 archlinuxarm
 
 on:
   workflow_dispatch:
+  schedule:
+    - cron: "0 0 * * *"
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - "**/README.md"
 
 jobs:
   build:
