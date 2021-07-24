@@ -33,9 +33,6 @@ REPO_URL = http://mirror.archlinuxarm.org
 BUILD_OPTS ?=
 
 CARD ?= /dev/loop0
-CARD_DATA_FS_TYPE ?=
-CARD_DATA_FS_FLAGS ?=
-CARD_DATA_BEGIN_AT ?= 4352MiB
 
 QEMU_PREFIX ?= /usr
 QEMU_RM ?= 1
@@ -223,10 +220,6 @@ _rpi_base_rootfs_tgz:
 
 $(_QEMU_COLLECTION):
 	$(call say,"Downloading QEMU")
-	# Using i386 QEMU because of this:
-	#   - https://bugs.launchpad.net/qemu/+bug/1805913
-	#   - https://lkml.org/lkml/2018/12/27/155
-	#   - https://stackoverflow.com/questions/27554325/readdir-32-64-compatibility-issues
 	mkdir -p $(_TMP_DIR)/qemu-user-static-deb
 	curl -L -f $(_QEMU_STATIC_BASE_URL)/`curl -s -S -L -f $(_QEMU_STATIC_BASE_URL)/ \
 			-z $(_TMP_DIR)/qemu-user-static-deb/qemu-user-static.deb \
@@ -281,15 +274,9 @@ format: $(__DEP_TOOLBOX)
 	$(__DOCKER_RUN_TMP_PRIVILEGED) bash -c " \
 		set -x \
 		&& set -e \
-		&& dd if=/dev/zero of=$(CARD) bs=1M count=32 \
-		&& partprobe $(CARD) \
-	"
-	$(__DOCKER_RUN_TMP_PRIVILEGED) bash -c " \
-		set -x \
-		&& set -e \
 		&& parted $(CARD) -s mklabel msdos \
-		&& parted $(CARD) -a optimal -s mkpart primary fat32 $(if $(findstring generic,rpi4),32MiB,0) 256MiB \
-		&& parted $(CARD) -a optimal -s mkpart primary ext4 256MiB 100% \
+		&& parted $(CARD) -a optimal -s mkpart primary fat32 2048 200MiB \
+		&& parted $(CARD) -a optimal -s mkpart primary ext4 200MiB 100% \
 		&& partprobe $(CARD) \
 	"
 	$(__DOCKER_RUN_TMP_PRIVILEGED) bash -c " \
@@ -330,7 +317,8 @@ install: extract format
 
 package: extract
 	$(call say,"Packaging to tar.gz")
-	tar -czf ./ArchLinuxARM-rpi4-aarch64-latest.tar.gz -C $(_RPI_RESULT_ROOTFS)/ .
+	mkdir ./release
+	tar -czf ./release/ArchLinuxARM-rpi4-aarch64-latest.tar.gz -C $(_RPI_RESULT_ROOTFS)/ .
 
 .PHONY: toolbox
 .NOTPARALLEL: clean-all install

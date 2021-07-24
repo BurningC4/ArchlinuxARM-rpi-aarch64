@@ -7,5 +7,24 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - name: Send greeting
-      run: echo "Hello ${{ github.event.inputs.name }}"
+      - name: Set variables
+        run: |
+          echo "RELEASE_NAME=$(date +%Y%m%d%H%M)" >> $GITHUB_ENV
+        shell: bash
+      - name: checkout repo
+        uses: actions/checkout@v2
+      - name: build package
+        run:  make package
+      - name: Generate sha256 hash
+        run:  sha256sum ./release/ArchLinuxARM-rpi4-aarch64-latest.tar.gz > ./release/ArchLinuxARM-rpi4-aarch64-latest.tar.gz.sha256sum
+      - name: Git push assets to "release" branch
+        run: |
+          cd release || exit 1
+          git init
+          git config --local user.name "github-actions[bot]"
+          git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b release
+          git add ArchLinuxARM-rpi4-aarch64-latest.tar.gz ArchLinuxARM-rpi4-aarch64-latest.tar.gz.sha256sum
+          git commit -m "${{ env.RELEASE_NAME }}"
+          git remote add geoip "https://${{ github.actor }}:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}"
+          git push -f -u ArchlinuxARM-rpi4-aarch64-builder release
