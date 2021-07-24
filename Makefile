@@ -318,7 +318,7 @@ install: extract format
 package: extract
 	$(call say,"Packaging to tar.gz")
 	mkdir ./release
-	tar -czf ./release/ArchLinuxARM-rpi4-aarch64-latest.tar.gz -C $(_RPI_RESULT_ROOTFS)/ .
+	sudo tar -czf ./release/ArchLinuxARM-rpi4-aarch64-latest.tar.gz -C $(_RPI_RESULT_ROOTFS)/ .
 
 .PHONY: toolbox
 .NOTPARALLEL: clean-all install
