@@ -3,7 +3,7 @@ name: Build rpi4 archlinuxarm
 on:
   workflow_dispatch:
   schedule:
-    - cron: "0 0 * * *"
+    - cron: "0 0 1,16 * *"
   push:
     branches:
       - main
@@ -16,14 +16,19 @@ jobs:
     steps:
       - name: Set variables
         run: |
-          echo "RELEASE_NAME=$(date +%Y%m%d%H%M)" >> $GITHUB_ENV
+          echo "TAG_NAME=$(date +%Y%m%d)" >> $GITHUB_ENV
+          echo "RELEASE_NAME=$(date +%Y%m%d)" >> $GITHUB_ENV
         shell: bash
+
       - name: checkout repo
         uses: actions/checkout@v2
+
       - name: build package
         run:  make package
+
       - name: Generate sha256 hash
         run:  sha256sum ./release/ArchLinuxARM-rpi-4-aarch64-latest.tar.gz > ./release/ArchLinuxARM-rpi-4-aarch64-latest.tar.gz.sha256sum
+
       - name: Git push assets to "release" branch
         run: |
           cd release || exit 1
@@ -39,3 +44,34 @@ jobs:
           git commit -m "${{ env.RELEASE_NAME }}"
           git remote add ArchlinuxARM-rpi4-aarch64-builder "https://${{ github.actor }}:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}"
           git push -f -u ArchlinuxARM-rpi4-aarch64-builder release
+
+      - name: Create a release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ env.TAG_NAME }}
+          release_name: ${{ env.RELEASE_NAME }}
+          draft: false
+          prerelease: false
+
+      - name: Upload ArchLinuxARM-rpi-4-aarch64-latest.tar.gz
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./release/ArchLinuxARM-rpi-4-aarch64-latest.tar.gz
+          asset_name: ArchLinuxARM-rpi-4-aarch64-latest.tar.gz
+          asset_content_type: application/gzip
+
+      - name: Upload ArchLinuxARM-rpi-4-aarch64-latest.tar.gz.sha256sum
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./release/ArchLinuxARM-rpi-4-aarch64-latest.tar.gz.sha256sum
+          asset_name: ArchLinuxARM-rpi-4-aarch64-latest.tar.gz.sha256sum
+          asset_content_type: text/plain
