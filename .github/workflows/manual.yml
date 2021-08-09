@@ -68,8 +68,12 @@ jobs:
           git init
           git config --local user.name "${{ github.actor }}"
           git config --local user.email "${{ github.actor }}@users.noreply.github.com"
+          git remote add ArchlinuxARM-rpi4-aarch64-builder "https://${{ github.actor }}:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}"
+          git push origin --delete release
+          rm -rf .git
           git lfs track "ArchLinuxARM-rpi-4-aarch64-latest.tar.gz"
           git add .gitattributes
+          git init
           git checkout -b release
           git add ArchLinuxARM-rpi-4-aarch64-latest.tar.gz ArchLinuxARM-rpi-4-aarch64-latest.tar.gz.sha256sum
           git commit -m "${{ env.RELEASE_NAME }}"
