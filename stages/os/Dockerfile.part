@@ -14,8 +14,7 @@ RUN pacman --noconfirm -Syy \
 		glibc \
 		pacman \
 	&& pacman-db-upgrade \
-	&& pacman --noconfirm -Syu \
-	&& pacman --ask=4 --needed --noconfirm -S linux-raspberrypi4 raspberrypi-bootloader raspberrypi-bootloader-x \
+	&& pacman --ask=4 --needed --noconfirm -Syu linux-raspberrypi4 raspberrypi-bootloader raspberrypi-bootloader-x \
 	&& rm -rf /var/cache/pacman/pkg/*
 
 COPY stages/os/bashrc /tmp/linux-profile/.bashrc
