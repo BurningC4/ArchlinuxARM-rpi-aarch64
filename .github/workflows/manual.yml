@@ -66,12 +66,11 @@ jobs:
           asset_content_type: text/plain
 
       - name: Delete release branch
-        run: |
-          git init
-          git checkout -b main
-          git config --local user.name "${{ github.actor }}"
-          git config --local user.email "${{ github.actor }}@users.noreply.github.com"
-          git push -f -u ArchlinuxARM-rpi4-aarch64-builder --delete release
+        uses: dawidd6/action-delete-branch@v3
+        with:
+          github_token: ${{github.token}}
+          branches: release
+          suffix: -done
           
       - name: Git push assets to "release" branch
         run: |
