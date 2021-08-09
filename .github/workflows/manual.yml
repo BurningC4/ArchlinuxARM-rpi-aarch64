@@ -70,7 +70,6 @@ jobs:
         with:
           github_token: ${{github.token}}
           branches: release
-          suffix: -done
           
       - name: Git push assets to "release" branch
         run: |
