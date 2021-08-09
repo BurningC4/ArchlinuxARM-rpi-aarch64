@@ -60,11 +60,13 @@ jobs:
           asset_name: ArchLinuxARM-rpi-4-aarch64-latest.tar.gz.sha256sum
           asset_content_type: text/plain
 
-      - name: Delete old release
+      - name: Delete release branch
           uses: ame-yu/action-delete-latest-release@v2
           with:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          run: |
+
+      - name: Delete old release
+        run: |
           git config --local user.name "${{ github.actor }}"
           git config --local user.email "${{ github.actor }}@users.noreply.github.com"
           git push -f -u ArchlinuxARM-rpi4-aarch64-builder --delete release
