@@ -3,7 +3,7 @@ name: Build rpi4 archlinuxarm
 on:
   workflow_dispatch:
   schedule:
-    - cron: "0 0 1,16 * *"
+    - cron: "0 0 * * *"
   push:
     branches:
       - main
@@ -64,25 +64,3 @@ jobs:
           asset_path: ./release/ArchLinuxARM-rpi-4-aarch64-latest.tar.gz.sha256sum
           asset_name: ArchLinuxARM-rpi-4-aarch64-latest.tar.gz.sha256sum
           asset_content_type: text/plain
-
-      - name: Delete release branch
-        uses: dawidd6/action-delete-branch@v3
-        with:
-          github_token: ${{github.token}}
-          branches: release
-          
-      - name: Git push assets to "release" branch
-        run: |
-          cd release || exit 1
-          sudo apt install git-lfs
-          git lfs install
-          git init
-          git config --local user.name "${{ github.actor }}"
-          git config --local user.email "${{ github.actor }}@users.noreply.github.com"
-          git checkout -b release
-          git lfs track "ArchLinuxARM-rpi-4-aarch64-latest.tar.gz"
-          git add .gitattributes
-          git add ArchLinuxARM-rpi-4-aarch64-latest.tar.gz ArchLinuxARM-rpi-4-aarch64-latest.tar.gz.sha256sum
-          git commit -m "${{ env.RELEASE_NAME }}"
-          git remote add ArchlinuxARM-rpi4-aarch64-builder "https://${{ github.actor }}:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}"
-          git push -f -u ArchlinuxARM-rpi4-aarch64-builder release
