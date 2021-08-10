@@ -33,7 +33,7 @@ jobs:
           sudo cp -f ./pacman.conf ./builder/etc/pacman.conf
           sudo cp ./prepare-target.sh ./builder/prepare-target.sh
           sudo cp ./set-target.sh ./builder/set-target.sh
-          sudo cp ./package-target.sh ./builder/package-targe.sh
+          sudo cp ./package-target.sh ./builder/package-target.sh
           cat ./builder/etc/pacman.conf
 
       - name: prepare builder
@@ -46,19 +46,20 @@ jobs:
 
       - name: package target
         run: |
-          sudo arch-chroot ./builder qemu-aarch64-static /usr/bin/bash /package-targe.sh
+          sudo arch-chroot ./builder qemu-aarch64-static /usr/bin/bash /package-target.sh
 
       - name: generate img file
         run: |
           mkdir ./release
           sudo mv ./builder/ArchLinuxARM-rpi-4-aarch64-latest.tar.gz ./release/ArchLinuxARM-rpi-4-aarch64-latest.tar.gz
           sudo dd if=/dev/zero of=ArchLinuxARM-rpi-4-aarch64-latest.img bs=4000 count=1000000
-          LOOP0=`sudo losetup --partscan --show --find ArchLinuxARM-rpi-4-aarch64-latest.img`
+          LOOP0=$(sudo losetup --partscan --show --find ArchLinuxARM-rpi-4-aarch64-latest.img)
           sudo parted -s $LOOP0 mklabel msdos
           sudo parted -s $LOOP0 mkpart primary fat32 2048s 411647s
           sudo parted -s $LOOP0 mkpart primary ext4 411648s 100%
           sudo losetup -d $LOOP0
-          LOOP1=`sudo losetup --partscan --show --find ArchLinuxARM-rpi-4-aarch64-latest.img`
+          LOOP1=$(sudo losetup --partscan --show --find ArchLinuxARM-rpi-4-aarch64-latest.img)
+          echo $LOOP1
           sudo mkfs.vfat -F 32 $LOOP1p1
           sudo mkfs.ext4 $LOOP1p2
           sudo mkdir -p image/root
