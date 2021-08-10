@@ -4,9 +4,9 @@
 ## 下载地址
 
 - **ArchLinuxARM-rpi-4-aarch64-latest.tar.gz**：
-  - https://github.com/BurningC4/ArchlinuxARM-rpi4-aarch64-builder/raw/release/ArchLinuxARM-rpi-4-aarch64-latest.tar.gz
+  - https://github.com/BurningC4/ArchlinuxARM-rpi4-aarch64-builder/releases/latest/download/ArchLinuxARM-rpi-4-aarch64-latest.tar.gz
 - **ArchLinuxARM-rpi-4-aarch64-latest.tar.gz.sha256sum**：
-  - https://github.com/BurningC4/ArchlinuxARM-rpi4-aarch64-builder/raw/release/ArchLinuxARM-rpi-4-aarch64-latest.tar.gz.sha256sum
+  - https://github.com/BurningC4/ArchlinuxARM-rpi4-aarch64-builder/releases/latest/download/ArchLinuxARM-rpi-4-aarch64-latest.tar.gz.sha256sum
 
 ## 编译方法
 
