@@ -34,7 +34,7 @@ jobs:
 
       - name: prepare builder
         run: |
-          sudo arch-chroot ./builder qemu-aarch64-static
+          sudo arch-chroot ./builder qemu-aarch64-static /usr/bin/bash
           ls -l
           pacman -Sy --ask=4 arch-install-scripts
           pacstrap -cGM ./mnt base linux-raspberrypi4 crda dhcpcd dialog haveged nano net-tools netctl openssh raspberrypi-bootloader raspberrypi-bootloader-x vi which wireless_tools wpa_supplicant
