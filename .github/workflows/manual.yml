@@ -34,6 +34,7 @@ jobs:
           sudo cp ./prepare-target.sh ./builder/prepare-target.sh
           sudo cp ./set-target.sh ./builder/set-target.sh
           sudo cp ./package-target.sh ./builder/package-targe.sh
+          cat ./builder/etc/pacman.conf
 
       - name: prepare builder
         run: |
