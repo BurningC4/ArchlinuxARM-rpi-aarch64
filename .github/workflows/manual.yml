@@ -29,19 +29,12 @@ jobs:
           curl -o ArchLinuxARM-aarch64-latest.tar.gz http://os.archlinuxarm.org/os/ArchLinuxARM-aarch64-latest.tar.gz
           sudo mkdir builder
           sudo bsdtar -xpf ArchLinuxARM-aarch64-latest.tar.gz -C builder
-          sudo mount -t proc /proc builder/proc/
-          sudo mount -t sysfs /sys builder/sys/
-          sudo mount --rbind /dev builder/dev/
-          sudo mount --rbind /run builder/run/
           sudo cp ./qemu/qemu-aarch64-static builder/usr/bin
           sudo chroot ./builder qemu-aarch64-static /usr/bin/bash
 
       - name: prepare builder
         run: |
-          pacman-key --init
-          pacman-key --populate archlinuxarm
           echo 'Server = https://opentuna.cn/archlinuxarm/$arch/$repo'>/etc/pacman.d/mirrorlist
-          sed -i -e "s/^CheckSpace/#CheckSpace/g" /etc/pacman.conf
           pacman -Sy --ask=4 arch-install-scripts
           pacstrap -cGM /mnt base linux-raspberrypi4 crda dhcpcd dialog haveged nano net-tools netctl openssh raspberrypi-bootloader raspberrypi-bootloader-x vi which wireless_tools wpa_supplicant
           arch-chroot mnt
