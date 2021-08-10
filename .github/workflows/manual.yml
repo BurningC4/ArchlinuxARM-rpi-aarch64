@@ -30,11 +30,12 @@ jobs:
           sudo mkdir ./builder
           sudo bsdtar -xpf ./ArchLinuxARM-aarch64-latest.tar.gz -C ./builder
           sudo cp /usr/bin/qemu-aarch64-static ./builder/usr/bin/qemu-aarch64-static
-
+          sudo cp -f ./pacman.conf ./builder/etc/pacman.conf
 
       - name: prepare builder
         run: |
           sudo chroot ./builder qemu-aarch64-static /usr/bin/bash
+          ls -l
           pacman -Sy --ask=4 arch-install-scripts
           pacstrap -cGM ./mnt base linux-raspberrypi4 crda dhcpcd dialog haveged nano net-tools netctl openssh raspberrypi-bootloader raspberrypi-bootloader-x vi which wireless_tools wpa_supplicant
           exit
