@@ -1,5 +1,5 @@
-/.mnt/
-/.tmp/
-/.build/
+/builder/
 /release/
-/.builded.conf
+/image/
+/ArchLinuxARM-rpi-4-aarch64-latest.img
+/.gitignore
