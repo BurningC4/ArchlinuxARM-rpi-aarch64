@@ -33,7 +33,7 @@ jobs:
           sudo cp -f ./pacman.conf ./builder/etc/pacman.conf
           sudo cp ./prepare-target.sh ./builder/prepare-target.sh
           sudo cp ./set-target.sh ./builder/set-target.sh
-          sudo cp ./package-target.sh ./builder/package-targe-target.sh
+          sudo cp ./package-target.sh ./builder/package-targe.sh
 
       - name: prepare builder
         run: |
@@ -45,7 +45,7 @@ jobs:
 
       - name: package target
         run: |
-          sudo arch-chroot ./builder qemu-aarch64-static /usr/bin/bash /package-targe-target.sh
+          sudo arch-chroot ./builder qemu-aarch64-static /usr/bin/bash /package-targe.sh
 
       - name: generate img file
         run: |
