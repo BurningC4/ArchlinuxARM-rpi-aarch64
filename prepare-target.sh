@@ -4,6 +4,5 @@ pacman-key --init
 pacman-key --populate archlinuxarm
 sed -i -e "s/^CheckSpace/#CheckSpace/g" /etc/pacman.conf
 pacman -Sy --ask=4 arch-install-scripts
-mkdir -p /mnt/root/boot
-pacstrap -cGM /mnt/root base linux-raspberrypi4 crda dhcpcd dialog haveged nano net-tools netctl openssh raspberrypi-bootloader raspberrypi-bootloader-x vi which wireless_tools wpa_supplicant
+pacstrap -cGM /mnt base linux-raspberrypi4 crda dhcpcd dialog haveged nano net-tools netctl openssh raspberrypi-bootloader raspberrypi-bootloader-x vi which wireless_tools wpa_supplicant
 exit
