@@ -25,7 +25,7 @@ jobs:
 
       - name: generate builder
         run: |
-          sudo apt install libarchive-tools qemu-user-static
+          sudo apt install libarchive-tools qemu-user-static arch-install-scripts
           sudo curl -L -o ./ArchLinuxARM-aarch64-latest.tar.gz http://os.archlinuxarm.org/os/ArchLinuxARM-aarch64-latest.tar.gz
           sudo mkdir ./builder
           sudo bsdtar -xpf ./ArchLinuxARM-aarch64-latest.tar.gz -C ./builder
@@ -34,7 +34,7 @@ jobs:
 
       - name: prepare builder
         run: |
-          sudo chroot ./builder qemu-aarch64-static /usr/bin/bash
+          sudo arch-chroot ./builder qemu-aarch64-static
           ls -l
           pacman -Sy --ask=4 arch-install-scripts
           pacstrap -cGM ./mnt base linux-raspberrypi4 crda dhcpcd dialog haveged nano net-tools netctl openssh raspberrypi-bootloader raspberrypi-bootloader-x vi which wireless_tools wpa_supplicant
@@ -42,7 +42,7 @@ jobs:
 
       - name: generate target
         run: |
-          sudo chroot ./builder qemu-aarch64-static /usr/bin/bash
+          sudo arch-chroot ./builder qemu-aarch64-static /usr/bin/bash
           arch-chroot ./mnt
           systemctl enable sshd systemd-networkd systemd-resolved systemd-timesyncd haveged
           echo -e '[Match]\nName=en*\n\n[Network]\nDHCP=yes\nDNSSEC=no'>/etc/systemd/network/en.network
@@ -59,7 +59,7 @@ jobs:
 
       - name: package target
         run: |
-          sudo chroot ./builder qemu-aarch64-static /usr/bin/bash
+          sudo arch-chroot ./builder qemu-aarch64-static /usr/bin/bash
           rm -rf mnt/etc/*- mnt/root/.bash_history mnt/root/.gnupg mnt/var/log/* mnt/var/lib/systemd/* 
           tar -czf ./release/ArchLinuxARM-rpi-4-aarch64-latest.tar.gz -C mnt/ .
           exit
