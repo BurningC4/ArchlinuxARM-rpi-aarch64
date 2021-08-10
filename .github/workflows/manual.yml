@@ -23,13 +23,76 @@ jobs:
       - name: checkout repo
         uses: actions/checkout@v2
 
-      - name: build package
-        run:  make package
+      - name: generate builder
+        run: |
+          curl -o ArchLinuxARM-aarch64-latest.tar.gz http://os.archlinuxarm.org/os/ArchLinuxARM-aarch64-latest.tar.gz
+          sudo mkdir ./builder
+          sudo bsdtar -xpf ArchLinuxARM-aarch64-latest.tar.gz -C ./builder
+          sudo mount -t proc /proc ./builder/proc/
+          sudo mount -t sysfs /sys ./builder/sys/
+          sudo mount --rbind /dev ./builder/dev/
+          sudo mount --rbind /run ./builder/run/
+          sudo cp ./qemu/qemu-aarch64-static ./builder/usr/bin
+          sudo chroot ./builder qemu-aarch64-static /usr/bin/bash
 
-      - name: Generate sha256 hash
-        run:  sha256sum ./release/ArchLinuxARM-rpi-4-aarch64-latest.tar.gz > ./release/ArchLinuxARM-rpi-4-aarch64-latest.tar.gz.sha256sum
+      - name: prepare builder
+        run: |
+          pacman-key --init
+          pacman-key --populate archlinuxarm
+          echo 'Server = https://opentuna.cn/archlinuxarm/$arch/$repo'>/etc/pacman.d/mirrorlist
+          sed -i -e "s/^CheckSpace/#CheckSpace/g" /etc/pacman.conf
+          pacman -Sy --ask=4 arch-install-scripts
+          pacstrap -cGM /mnt base linux-raspberrypi4 crda dhcpcd dialog haveged nano net-tools netctl openssh raspberrypi-bootloader raspberrypi-bootloader-x vi which wireless_tools wpa_supplicant
+          arch-chroot mnt
 
-      - name: Delete old release
+      - name: generate target
+        run: |
+          systemctl enable sshd systemd-networkd systemd-resolved systemd-timesyncd haveged
+          echo -e '[Match]\nName=en*\n\n[Network]\nDHCP=yes\nDNSSEC=no'>/etc/systemd/network/en.network
+          echo -e '[Match]\nName=eth*\n\n[Network]\nDHCP=yes\nDNSSEC=no'>/etc/systemd/network/eth.network
+          echo '/dev/mmcblk0p1  /boot   vfat    defaults        0       0'>>/etc/fstab
+          echo 'alarm'>/etc/hostname
+          echo 'LANG=C'>/etc/locale.conf
+          echo "root:root" | chpasswd
+          useradd -d /home/alarm -m -U -p `openssl passwd -6 alarm` alarm
+          rm /etc/resolv.conf
+          ln -s /run/systemd/resolve/resolv.conf /etc/resolv.conf
+          exit
+
+      - name: package target
+        run: |
+          rm -rf mnt/etc/*- mnt/root/.bash_history mnt/root/.gnupg mnt/var/log/* mnt/var/lib/systemd/* 
+          tar -czf ./release/ArchLinuxARM-rpi-4-aarch64-latest.tar.gz -C mnt/ .
+          exit
+
+      - name: gemerate img file
+        run: |
+          sudo mv ./builder/ArchLinuxARM-rpi-4-aarch64-latest.tar.gz ./release/ArchLinuxARM-rpi-4-aarch64-latest.tar.gz
+          sudo dd if=/dev/zero of=ArchLinuxARM-rpi-4-aarch64-latest.img bs=4000 count=1000000
+          sudo losetup /dev/loop0 ArchLinuxARM-rpi-4-aarch64-latest.img
+          sudo parted -s /dev/loop0 mklabel msdos
+          sudo parted -s /dev/loop0 mkpart primary fat32 2048s 411647s
+          sudo parted -s /dev/loop0 mkpart primary ext4 411648s 100%
+          sudo losetup -d /dev/loop0
+          sudo losetup --partscan --show --find ArchLinuxARM-rpi-4-aarch64-latest.img
+          sudo mkfs.vfat -F 32 /dev/loop0p1
+          sudo mkfs.ext4 /dev/loop0p2
+          sudo mkdir -p image/root
+          sudo mount /dev/loop0p2 image/root
+          sudo mkdir -p image/root/boot
+          sudo mount /dev/loop0p1 image/root/boot
+          sudo bsdtar -xpf ArchLinuxARM-rpi-4-aarch64-latest.tar.gz -C image/root
+          sudo sync
+          sudo umount -R image/root
+          sudo losetup -d /dev/loop0
+          sudo zip ./release/ArchLinuxARM-rpi-4-aarch64-latest.img.zip ArchLinuxARM-rpi-4-aarch64-latest.img
+
+      - name: generate sha256 hash
+        run: |
+          sha256sum ./release/ArchLinuxARM-rpi-4-aarch64-latest.tar.gz > ./release/ArchLinuxARM-rpi-4-aarch64-latest.tar.gz.sha256sum
+          sha256sum ./release/ArchLinuxARM-rpi-4-aarch64-latest.img.zip > ./release/ArchLinuxARM-rpi-4-aarch64-latest.img.zip.sha256sum
+
+      - name: delete old release
         uses: ame-yu/action-delete-latest-release@v2
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -63,4 +126,24 @@ jobs:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ./release/ArchLinuxARM-rpi-4-aarch64-latest.tar.gz.sha256sum
           asset_name: ArchLinuxARM-rpi-4-aarch64-latest.tar.gz.sha256sum
+          asset_content_type: text/plain
+
+      - name: Upload ArchLinuxARM-rpi-4-aarch64-latest.img.zip
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./release/ArchLinuxARM-rpi-4-aarch64-latest.img.zip
+          asset_name: ArchLinuxARM-rpi-4-aarch64-latest.img.zip
+          asset_content_type: application/gzip
+
+      - name: Upload ArchLinuxARM-rpi-4-aarch64-latest.tar.gz.sha256sum
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./release/ArchLinuxARM-rpi-4-aarch64-latest.img.zip.sha256sum
+          asset_name: ArchLinuxARM-rpi-4-aarch64-latest.img.zip.sha256sum
           asset_content_type: text/plain
