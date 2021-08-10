@@ -30,7 +30,10 @@ jobs:
           sudo mkdir ./builder
           sudo bsdtar -xpf ./ArchLinuxARM-aarch64-latest.tar.gz -C ./builder
           sudo cp /usr/bin/qemu-aarch64-static ./builder/usr/bin/qemu-aarch64-static
-          sudo install -m 755 ./prepare-target.sh ./builder/prepare-target.sh
+          sudo cp -f ./pacman.conf ./builder/etc/pacman.conf
+          sudo cp ./prepare-target.sh ./builder/prepare-target.sh
+          sudo cp ./set-target.sh ./builder/set-target.sh
+          sudo cp ./package-target.sh ./builder/package-targe-target.sh
 
       - name: prepare builder
         run: |
@@ -38,27 +41,11 @@ jobs:
 
       - name: generate target
         run: |
-          sudo arch-chroot ./builder qemu-aarch64-static /usr/bin/bash
-          arch-chroot ./mnt
-          systemctl enable sshd systemd-networkd systemd-resolved systemd-timesyncd haveged
-          echo -e '[Match]\nName=en*\n\n[Network]\nDHCP=yes\nDNSSEC=no'>/etc/systemd/network/en.network
-          echo -e '[Match]\nName=eth*\n\n[Network]\nDHCP=yes\nDNSSEC=no'>/etc/systemd/network/eth.network
-          echo '/dev/mmcblk0p1  /boot   vfat    defaults        0       0'>>/etc/fstab
-          echo 'alarm'>/etc/hostname
-          echo 'LANG=C'>/etc/locale.conf
-          echo "root:root" | chpasswd
-          useradd -d /home/alarm -m -U -p `openssl passwd -6 alarm` alarm
-          rm /etc/resolv.conf
-          ln -s /run/systemd/resolve/resolv.conf /etc/resolv.conf
-          exit
-          exit
+          sudo arch-chroot ./builder qemu-aarch64-static /usr/bin/bash /set-target.sh
 
       - name: package target
         run: |
-          sudo arch-chroot ./builder qemu-aarch64-static /usr/bin/bash
-          rm -rf mnt/etc/*- mnt/root/.bash_history mnt/root/.gnupg mnt/var/log/* mnt/var/lib/systemd/* 
-          tar -czf ./release/ArchLinuxARM-rpi-4-aarch64-latest.tar.gz -C mnt/ .
-          exit
+          sudo arch-chroot ./builder qemu-aarch64-static /usr/bin/bash /package-targe-target.sh
 
       - name: gemerate img file
         run: |
