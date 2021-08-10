@@ -8,6 +8,5 @@ arch-chroot ./mnt /usr/bin/echo 'alarm'>/etc/hostname
 arch-chroot ./mnt /usr/bin/echo 'LANG=C'>/etc/locale.conf
 arch-chroot ./mnt /usr/bin/echo "root:root" | chpasswd
 arch-chroot ./mnt /usr/bin/useradd -d /home/alarm -m -U -p `openssl passwd -6 alarm` alarm
-arch-chroot ./mnt /usr/bin/rm /etc/resolv.conf
-arch-chroot ./mnt /usr/bin/ln -s /run/systemd/resolve/resolv.conf /etc/resolv.conf
+arch-chroot ./mnt /usr/bin/ln -sf /run/systemd/resolve/resolv.conf /etc/resolv.conf
 exit
