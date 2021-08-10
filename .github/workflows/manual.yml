@@ -47,7 +47,7 @@ jobs:
         run: |
           sudo arch-chroot ./builder qemu-aarch64-static /usr/bin/bash /package-targe-target.sh
 
-      - name: gemerate img file
+      - name: generate img file
         run: |
           sudo mv ./builder/ArchLinuxARM-rpi-4-aarch64-latest.tar.gz ./release/ArchLinuxARM-rpi-4-aarch64-latest.tar.gz
           sudo dd if=/dev/zero of=ArchLinuxARM-rpi-4-aarch64-latest.img bs=4000 count=1000000
