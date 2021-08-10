@@ -29,7 +29,7 @@ jobs:
           curl -o ArchLinuxARM-aarch64-latest.tar.gz http://os.archlinuxarm.org/os/ArchLinuxARM-aarch64-latest.tar.gz
           sudo mkdir builder
           sudo bsdtar -xpf ArchLinuxARM-aarch64-latest.tar.gz -C builder
-          sudo cp ./qemu/qemu-aarch64-static builder/usr/bin
+          sudo cp ./qemu/qemu-aarch64-static builder/usr/bin/qemu-aarch64-static
           sudo chroot ./builder qemu-aarch64-static /usr/bin/bash
 
       - name: prepare builder
