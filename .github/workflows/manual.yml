@@ -25,7 +25,7 @@ jobs:
 
       - name: generate builder
         run: |
-          sudo apt install libarchive-tools
+          sudo apt install libarchive-tools qemu-user-static
           sudo curl -L -o ./ArchLinuxARM-aarch64-latest.tar.gz http://os.archlinuxarm.org/os/ArchLinuxARM-aarch64-latest.tar.gz
           sudo mkdir ./builder
           sudo bsdtar -xpf ./ArchLinuxARM-aarch64-latest.tar.gz -C ./builder
