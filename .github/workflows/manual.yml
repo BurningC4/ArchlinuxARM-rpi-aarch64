@@ -34,7 +34,7 @@ jobs:
 
       - name: prepare builder
         run: |
-          sudo arch-chroot ./builder qemu-aarch64-static /prepare-target.sh
+          sudo arch-chroot ./builder qemu-aarch64-static /usr/bin/bash /prepare-target.sh
 
       - name: generate target
         run: |
