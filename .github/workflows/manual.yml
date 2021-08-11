@@ -16,12 +16,10 @@ jobs:
     env: 
       BUILDER_ENV: 'sudo arch-chroot ./builder qemu-aarch64-static /usr/bin/bash -c'
       TARGET_ENV: 'sudo arch-chroot ./builder qemu-aarch64-static /usr/bin/bash arch-chroot /mnt /usr/bin/bash -c'
-    steps:
-      - name: Set variables
-        run: |
-          echo "RELEASE=$(date +%Y%m%d)" >> $GITHUB_ENV
-        shell: bash
+      RELEASE: '$(date +%Y%m%d)'
+      DEVICE: '$(losetup -f)'
 
+    steps:
       - name: checkout repo
         uses: actions/checkout@v2
 
@@ -39,17 +37,15 @@ jobs:
       - name: prepare image file
         run: |
           dd if=/dev/zero of=ArchLinuxARM-rpi-4-aarch64-latest.img bs=4000 count=1000000
-          sudo losetup --partscan /dev/loop10 ArchLinuxARM-rpi-4-aarch64-latest.img
-          sudo parted -s /dev/loop10 mklabel msdos
-          sudo parted -s /dev/loop10 mkpart primary fat32 2048s 411647s
-          sudo parted -s /dev/loop10 mkpart primary ext4 411648s 100%
-          sudo losetup -d /dev/loop10
-          sudo losetup --partscan /dev/loop10 ArchLinuxARM-rpi-4-aarch64-latest.img
-          sudo mkfs.vfat -F 32 /dev/loop10p1
-          sudo mkfs.ext4 /dev/loop10p2
-          ${{ env.BUILDER_ENV }} "mount /dev/loop10p2 /mnt"
+          sudo losetup --partscan ${{ env.DEVICE }} ArchLinuxARM-rpi-4-aarch64-latest.img
+          sudo parted -s ${{ env.DEVICE }} mklabel msdos
+          sudo parted -s ${{ env.DEVICE }} mkpart primary fat32 2048s 411647s
+          sudo parted -s ${{ env.DEVICE }} mkpart primary ext4 411648s 100%
+          sudo mkfs.vfat -F 32 ${{ env.DEVICE }}p1
+          sudo mkfs.ext4 ${{ env.DEVICE }}p2
+          ${{ env.BUILDER_ENV }} "mount ${{ env.DEVICE }}p2 /mnt"
           ${{ env.BUILDER_ENV }} "mkdir -p /mnt/boot"
-          ${{ env.BUILDER_ENV }} "mount /dev/loop10p1 /mnt/boot"
+          ${{ env.BUILDER_ENV }} "mount ${{ env.DEVICE }}p1 /mnt/boot"
 
       - name: generate target
         run: |
@@ -72,7 +68,7 @@ jobs:
           ${{ env.BUILDER_ENV }} "sync"
           ${{ env.BUILDER_ENV }} "bsdtar --exclude 'lost+found' -czpf /ArchLinuxARM-rpi-4-aarch64-latest.tar.gz -C /mnt/ ."
           ${{ env.BUILDER_ENV }} "umount -R /mnt"
-          sudo losetup -d /dev/loop10
+          sudo losetup -d ${{ env.DEVICE }}
           zip ArchLinuxARM-rpi-4-aarch64-latest.img.zip ArchLinuxARM-rpi-4-aarch64-latest.img
 
       - name: generate release
