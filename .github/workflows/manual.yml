@@ -69,9 +69,9 @@ jobs:
         run: |
           ${{ env.BUILDER_ENV }}/rm -rf /mnt/etc/*- /mnt/root/.bash_history /mnt/root/.gnupg /mnt/var/log/* /mnt/var/lib/systemd/* 
           ${{ env.BUILDER_ENV }}/sync
-          ${{ env.BUILDER_ENV }}/bsdtar -czpf /ArchLinuxARM-rpi-4-aarch64-latest.tar.gz -C /mnt/ . --exclude lost+found
+          ${{ env.BUILDER_ENV }}/bsdtar --exclude 'lost+found' -czpf /ArchLinuxARM-rpi-4-aarch64-latest.tar.gz -C /mnt/ .
           ${{ env.BUILDER_ENV }}/umount -R /mnt
-          losetup -d /dev/loop10
+          sudo losetup -d /dev/loop10
           zip ArchLinuxARM-rpi-4-aarch64-latest.img.zip ArchLinuxARM-rpi-4-aarch64-latest.img
 
       - name: generate release
