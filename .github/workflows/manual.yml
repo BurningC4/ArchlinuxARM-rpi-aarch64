@@ -53,23 +53,23 @@ jobs:
           mkdir ./release
           sudo mv ./builder/ArchLinuxARM-rpi-4-aarch64-latest.tar.gz ./release/ArchLinuxARM-rpi-4-aarch64-latest.tar.gz
           sudo dd if=/dev/zero of=ArchLinuxARM-rpi-4-aarch64-latest.img bs=4000 count=1000000
-          LOOP0=$(sudo losetup --partscan --show --find ArchLinuxARM-rpi-4-aarch64-latest.img)
-          sudo parted -s $LOOP0 mklabel msdos
-          sudo parted -s $LOOP0 mkpart primary fat32 2048s 411647s
-          sudo parted -s $LOOP0 mkpart primary ext4 411648s 100%
-          sudo losetup -d $LOOP0
-          LOOP1=$(sudo losetup --partscan --show --find ArchLinuxARM-rpi-4-aarch64-latest.img)
-          echo $LOOP1
-          sudo mkfs.vfat -F 32 $LOOP1p1
-          sudo mkfs.ext4 $LOOP1p2
+          echo LOOP0=$(sudo losetup --partscan --show --find ArchLinuxARM-rpi-4-aarch64-latest.img) >> $GITHUB_ENV
+          sudo parted -s ${{ env.LOOP0 }} mklabel msdos
+          sudo parted -s ${{ env.LOOP0 }} mkpart primary fat32 2048s 411647s
+          sudo parted -s ${{ env.LOOP0 }} mkpart primary ext4 411648s 100%
+          sudo losetup -d ${{ env.LOOP0 }}
+          echo LOOP1=$(sudo losetup --partscan --show --find ArchLinuxARM-rpi-4-aarch64-latest.img) >> $GITHUB_ENV
+          echo ${{ env.LOOP1 }}
+          sudo mkfs.vfat -F 32 ${{ env.LOOP1 }}p1
+          sudo mkfs.ext4 ${{ env.LOOP1 }}p2
           sudo mkdir -p image/root
-          sudo mount $LOOP1p2 image/root
+          sudo mount ${{ env.LOOP1 }}p2 image/root
           sudo mkdir -p image/root/boot
-          sudo mount $LOOP1p1 image/root/boot
+          sudo mount ${{ env.LOOP1 }}p1 image/root/boot
           sudo bsdtar -xpf ArchLinuxARM-rpi-4-aarch64-latest.tar.gz -C image/root
           sudo sync
           sudo umount -R image/root
-          sudo losetup -d $LOOP1
+          sudo losetup -d ${{ env.LOOP1 }}
           sudo zip ./release/ArchLinuxARM-rpi-4-aarch64-latest.img.zip ArchLinuxARM-rpi-4-aarch64-latest.img
 
       - name: generate sha256 hash
