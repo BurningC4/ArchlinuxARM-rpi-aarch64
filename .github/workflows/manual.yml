@@ -33,7 +33,7 @@ jobs:
           sudo bsdtar -xpf ./ArchLinuxARM-aarch64-latest.tar.gz -C ./builder
           sudo cp /usr/bin/qemu-aarch64-static ./builder/usr/bin/qemu-aarch64-static
           sudo cp -f ./pacman.conf ./builder/etc/pacman.conf
-          echo 'PACKAGES=$(cat package.md)' >> $GITHUB_ENV
+          echo PACKAGES=$(cat package.md) >> $GITHUB_ENV
           ${{ env.BUILDER_ENV }} "pacman -Sy --ask=4 arch-install-scripts"
 
       - name: prepare image file
