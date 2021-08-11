@@ -14,8 +14,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env: 
-      BUILDER_ENV: 'sudo arch-chroot ./builder qemu-aarch64-static /usr/bin'
-      TARGET_ENV: 'sudo arch-chroot ./builder qemu-aarch64-static /usr/bin/bash arch-chroot /mnt'
+      BUILDER_ENV: 'sudo arch-chroot ./builder qemu-aarch64-static /usr/bin/bash -c'
+      TARGET_ENV: 'sudo arch-chroot ./builder qemu-aarch64-static /usr/bin/bash arch-chroot /mnt /usr/bin/bash -c'
     steps:
       - name: Set variables
         run: |
@@ -33,7 +33,8 @@ jobs:
           sudo bsdtar -xpf ./ArchLinuxARM-aarch64-latest.tar.gz -C ./builder
           sudo cp /usr/bin/qemu-aarch64-static ./builder/usr/bin/qemu-aarch64-static
           sudo cp -f ./pacman.conf ./builder/etc/pacman.conf
-          ${{ env.BUILDER_ENV }}/pacman -Sy --ask=4 arch-install-scripts
+          echo 'PACKAGES=$(cat package.md)' >> $GITHUB_ENV
+          ${{ env.BUILDER_ENV }} "pacman -Sy --ask=4 arch-install-scripts"
 
       - name: prepare image file
         run: |
@@ -46,30 +47,31 @@ jobs:
           sudo losetup --partscan /dev/loop10 ArchLinuxARM-rpi-4-aarch64-latest.img
           sudo mkfs.vfat -F 32 /dev/loop10p1
           sudo mkfs.ext4 /dev/loop10p2
-          ${{ env.BUILDER_ENV }}/mount /dev/loop10p2 /mnt
-          ${{ env.BUILDER_ENV }}/mkdir -p /mnt/boot
-          ${{ env.BUILDER_ENV }}/mount /dev/loop10p1 /mnt/boot
+          ${{ env.BUILDER_ENV }} "mount /dev/loop10p2 /mnt"
+          ${{ env.BUILDER_ENV }} "mkdir -p /mnt/boot"
+          ${{ env.BUILDER_ENV }} "mount /dev/loop10p1 /mnt/boot"
 
       - name: generate target
         run: |
-          ${{ env.BUILDER_ENV }}/bash pacstrap -cGM /mnt base linux-raspberrypi4 crda dhcpcd dialog haveged nano net-tools netctl openssh raspberrypi-bootloader raspberrypi-bootloader-x vi which wireless_tools wpa_supplicant
-          ${{ env.BUILDER_ENV }}/rm /mnt/etc/resolv.conf
+          ${{ env.BUILDER_ENV }} "pacstrap -cGM /mnt ${{ env.PACKAGES }}"
+          ${{ env.BUILDER_ENV }} "rm /mnt/etc/resolv.conf"
           ${{ env.TARGET_ENV}} systemctl enable sshd systemd-networkd systemd-resolved systemd-timesyncd haveged
-          ${{ env.TARGET_ENV}} bash -c "echo -e '[Match]\nName=en*\n\n[Network]\nDHCP=yes\nDNSSEC=no'>/etc/systemd/network/en.network"
-          ${{ env.TARGET_ENV}} bash -c "echo -e '[Match]\nName=eth*\n\n[Network]\nDHCP=yes\nDNSSEC=no'>/etc/systemd/network/eth.network"
-          ${{ env.TARGET_ENV}} bash -c "echo '/dev/mmcblk0p1  /boot   vfat    defaults        0       0'>>/etc/fstab"
-          ${{ env.TARGET_ENV}} bash -c "echo 'alarm'>/etc/hostname"
-          ${{ env.TARGET_ENV}} bash -c "echo 'LANG=C'>/etc/locale.conf"
-          ${{ env.TARGET_ENV}} bash -c "echo "root:root" | chpasswd"
-          ${{ env.TARGET_ENV}} bash -c "useradd -d /home/alarm -m -U -p `openssl passwd -6 alarm` alarm"
-          ${{ env.TARGET_ENV}} bash -c "ln -s /run/systemd/resolve/resolv.conf /etc/resolv.conf"
+          ${{ env.TARGET_ENV}} "echo -e '[Match]\nName=en*\n\n[Network]\nDHCP=yes\nDNSSEC=no'>/etc/systemd/network/en.network"
+          ${{ env.TARGET_ENV}} "echo -e '[Match]\nName=eth*\n\n[Network]\nDHCP=yes\nDNSSEC=no'>/etc/systemd/network/eth.network"
+          ${{ env.TARGET_ENV}} "echo '/dev/mmcblk0p1  /boot   vfat    defaults        0       0'>>/etc/fstab"
+          ${{ env.TARGET_ENV}} "echo 'alarm'>/etc/hostname"
+          ${{ env.TARGET_ENV}} "echo 'LANG=C'>/etc/locale.conf"
+          ${{ env.TARGET_ENV}} "echo "root:root" | chpasswd"
+          ${{ env.TARGET_ENV}} "useradd -d /home/alarm -m -U alarm"
+          ${{ env.TARGET_ENV}} "echo "alarm:alarm" | chpasswd"
+          ${{ env.TARGET_ENV}} "ln -s /run/systemd/resolve/resolv.conf /etc/resolv.conf"
 
       - name: package target
         run: |
-          ${{ env.BUILDER_ENV }}/rm -rf /mnt/etc/*- /mnt/root/.bash_history /mnt/root/.gnupg /mnt/var/log/* /mnt/var/lib/systemd/* 
-          ${{ env.BUILDER_ENV }}/sync
-          ${{ env.BUILDER_ENV }}/bsdtar --exclude 'lost+found' -czpf /ArchLinuxARM-rpi-4-aarch64-latest.tar.gz -C /mnt/ .
-          ${{ env.BUILDER_ENV }}/umount -R /mnt
+          ${{ env.BUILDER_ENV }} "rm -rf /mnt/etc/*- /mnt/root/.bash_history /mnt/root/.gnupg /mnt/var/log/* /mnt/var/lib/systemd/* "
+          ${{ env.BUILDER_ENV }} "sync"
+          ${{ env.BUILDER_ENV }} "bsdtar --exclude 'lost+found' -czpf /ArchLinuxARM-rpi-4-aarch64-latest.tar.gz -C /mnt/ ."
+          ${{ env.BUILDER_ENV }} "umount -R /mnt"
           sudo losetup -d /dev/loop10
           zip ArchLinuxARM-rpi-4-aarch64-latest.img.zip ArchLinuxARM-rpi-4-aarch64-latest.img
 
