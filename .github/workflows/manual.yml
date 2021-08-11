@@ -39,7 +39,7 @@ jobs:
       - name: generate img file
         run: |
           ${{ env.BUILDER_ENV }}/dd if=/dev/zero of=ArchLinuxARM-rpi-4-aarch64-latest.img bs=4000 count=1000000
-          ${{ env.BUILDER_ENV }}/losetup --partscan /dev/loop10 ArchLinuxARM-rpi-4-aarch64-latest.img
+          ${{ env.BUILDER_ENV }}/losetup --partscan -f ArchLinuxARM-rpi-4-aarch64-latest.img
           ${{ env.BUILDER_ENV }}/parted -s /dev/loop10 mklabel msdos
           ${{ env.BUILDER_ENV }}/parted -s /dev/loop10 mkpart primary fat32 2048s 411647s
           ${{ env.BUILDER_ENV }}/parted -s /dev/loop10 mkpart primary ext4 411648s 100%
