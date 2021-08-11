@@ -56,15 +56,14 @@ jobs:
           ${{ env.BUILDER_ENV }}/bash pacstrap -cGM /mnt base linux-raspberrypi4 crda dhcpcd dialog haveged nano net-tools netctl openssh raspberrypi-bootloader raspberrypi-bootloader-x vi which wireless_tools wpa_supplicant
           ${{ env.BUILDER_ENV }}/rm /mnt/etc/resolv.conf
           ${{ env.TARGET_ENV}} systemctl enable sshd systemd-networkd systemd-resolved systemd-timesyncd haveged
-          ${{ env.TARGET_ENV}} touch /etc/systemd/network/en.network /etc/systemd/network/eth.network /etc/hostname
-          ${{ env.TARGET_ENV}} echo -e '[Match]\nName=en*\n\n[Network]\nDHCP=yes\nDNSSEC=no'>>/etc/systemd/network/en.network
-          ${{ env.TARGET_ENV}} echo -e '[Match]\nName=eth*\n\n[Network]\nDHCP=yes\nDNSSEC=no'>>/etc/systemd/network/eth.network
-          ${{ env.TARGET_ENV}} echo '/dev/mmcblk0p1  /boot   vfat    defaults        0       0'>>/etc/fstab
-          ${{ env.TARGET_ENV}} echo 'alarm'>>/etc/hostname
-          ${{ env.TARGET_ENV}} echo 'LANG=C'>>/etc/locale.conf
-          ${{ env.TARGET_ENV}} echo "root:root" | chpasswd
-          ${{ env.TARGET_ENV}} useradd -d /home/alarm -m -U -p `openssl passwd -6 alarm` alarm
-          ${{ env.TARGET_ENV}} ln -s /run/systemd/resolve/resolv.conf /etc/resolv.conf
+          ${{ env.TARGET_ENV}} bash -c "echo -e '[Match]\nName=en*\n\n[Network]\nDHCP=yes\nDNSSEC=no'>/etc/systemd/network/en.network"
+          ${{ env.TARGET_ENV}} bash -c "echo -e '[Match]\nName=eth*\n\n[Network]\nDHCP=yes\nDNSSEC=no'>/etc/systemd/network/eth.network"
+          ${{ env.TARGET_ENV}} bash -c "echo '/dev/mmcblk0p1  /boot   vfat    defaults        0       0'>>/etc/fstab"
+          ${{ env.TARGET_ENV}} bash -c "echo 'alarm'>/etc/hostname"
+          ${{ env.TARGET_ENV}} bash -c "echo 'LANG=C'>/etc/locale.conf"
+          ${{ env.TARGET_ENV}} bash -c "echo "root:root" | chpasswd"
+          ${{ env.TARGET_ENV}} bash -c "useradd -d /home/alarm -m -U -p `openssl passwd -6 alarm` alarm"
+          ${{ env.TARGET_ENV}} bash -c "ln -s /run/systemd/resolve/resolv.conf /etc/resolv.conf"
 
       - name: package target
         run: |
