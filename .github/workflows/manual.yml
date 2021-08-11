@@ -36,7 +36,7 @@ jobs:
           sudo cp -f ./pacman.conf ./builder/etc/pacman.conf
           ${{ env.BUILDER_ENV }}/pacman -Sy --ask=4 arch-install-scripts
 
-      - name: generate img file
+      - name: prepare image file
         run: |
           dd if=/dev/zero of=ArchLinuxARM-rpi-4-aarch64-latest.img bs=4000 count=1000000
           sudo losetup --partscan /dev/loop10 ArchLinuxARM-rpi-4-aarch64-latest.img
@@ -47,9 +47,9 @@ jobs:
           sudo losetup --partscan /dev/loop10 ArchLinuxARM-rpi-4-aarch64-latest.img
           sudo mkfs.vfat -F 32 /dev/loop10p1
           sudo mkfs.ext4 /dev/loop10p2
-          sudo mkdir -p ./builder/mnt/boot
-          sudo mount /dev/loop10p2 ./builder/mnt
-          sudo mount /dev/loop10p1 ./builder/mnt/boot
+          ${{ env.BUILDER_ENV }}mkdir -p /mnt/boot
+          ${{ env.BUILDER_ENV }}mount /dev/loop10p2 /mnt
+          ${{ env.BUILDER_ENV }}mount /dev/loop10p1 /mnt/boot
 
       - name: generate target
         run: |
@@ -68,7 +68,9 @@ jobs:
       - name: package target
         run: |
           ${{ env.BUILDER_ENV }}/rm -rf /mnt/etc/*- /mnt/root/.bash_history /mnt/root/.gnupg /mnt/var/log/* /mnt/var/lib/systemd/* 
+          ${{ env.BUILDER_ENV }}/sync
           ${{ env.BUILDER_ENV }}/bsdtar -czpf /ArchLinuxARM-rpi-4-aarch64-latest.tar.gz -C /mnt/ . --exclude lost+found
+          ${{ env.BUILDER_ENV }}/umount -R /mnt
           losetup -d /dev/loop10
           zip ArchLinuxARM-rpi-4-aarch64-latest.img.zip ArchLinuxARM-rpi-4-aarch64-latest.img
 
