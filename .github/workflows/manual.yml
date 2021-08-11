@@ -34,45 +34,44 @@ jobs:
           sudo bsdtar -xpf ./ArchLinuxARM-aarch64-latest.tar.gz -C ./builder
           sudo cp /usr/bin/qemu-aarch64-static ./builder/usr/bin/qemu-aarch64-static
           sudo cp -f ./pacman.conf ./builder/etc/pacman.conf
-          cat ./builder/etc/pacman.conf
-          $env.BUILDER_ENV/pacman -Sy --ask=4 arch-install-scripts
+          ${{ env.BUILDER_ENV }}/pacman -Sy --ask=4 arch-install-scripts
 
       - name: generate img file
         run: |
-          $env.BUILDER_ENV/dd if=/dev/zero of=ArchLinuxARM-rpi-4-aarch64-latest.img bs=4000 count=1000000
-          $env.BUILDER_ENV/losetup --partscan /dev/loop10 ArchLinuxARM-rpi-4-aarch64-latest.img
-          $env.BUILDER_ENV/parted -s /dev/loop10 mklabel msdos
-          $env.BUILDER_ENV/parted -s /dev/loop10 mkpart primary fat32 2048s 411647s
-          $env.BUILDER_ENV/parted -s /dev/loop10 mkpart primary ext4 411648s 100%
-          $env.BUILDER_ENV/losetup -d /dev/loop10
-          $env.BUILDER_ENV/losetup --partscan /dev/loop10 ArchLinuxARM-rpi-4-aarch64-latest.img
-          $env.BUILDER_ENV/mkfs.vfat -F 32 /dev/loop10p1
-          $env.BUILDER_ENV/mkfs.ext4 /dev/loop10p2
-          $env.BUILDER_ENV/mkdir -p /mnt/boot
-          $env.BUILDER_ENV/mount /dev/loop10p2 /mnt
-          $env.BUILDER_ENV/mkdir -p /mnt/boot
-          $env.BUILDER_ENV/mount /dev/loop10p1 /mnt/boot
+          ${{ env.BUILDER_ENV }}/dd if=/dev/zero of=ArchLinuxARM-rpi-4-aarch64-latest.img bs=4000 count=1000000
+          ${{ env.BUILDER_ENV }}/losetup --partscan /dev/loop10 ArchLinuxARM-rpi-4-aarch64-latest.img
+          ${{ env.BUILDER_ENV }}/parted -s /dev/loop10 mklabel msdos
+          ${{ env.BUILDER_ENV }}/parted -s /dev/loop10 mkpart primary fat32 2048s 411647s
+          ${{ env.BUILDER_ENV }}/parted -s /dev/loop10 mkpart primary ext4 411648s 100%
+          ${{ env.BUILDER_ENV }}/losetup -d /dev/loop10
+          ${{ env.BUILDER_ENV }}/losetup --partscan /dev/loop10 ArchLinuxARM-rpi-4-aarch64-latest.img
+          ${{ env.BUILDER_ENV }}/mkfs.vfat -F 32 /dev/loop10p1
+          ${{ env.BUILDER_ENV }}/mkfs.ext4 /dev/loop10p2
+          ${{ env.BUILDER_ENV }}/mkdir -p /mnt/boot
+          ${{ env.BUILDER_ENV }}/mount /dev/loop10p2 /mnt
+          ${{ env.BUILDER_ENV }}/mkdir -p /mnt/boot
+          ${{ env.BUILDER_ENV }}/mount /dev/loop10p1 /mnt/boot
 
       - name: generate target
         run: |
-          $env.BUILDER_ENV/bash pacstrap -cGM /mnt base linux-raspberrypi4 crda dhcpcd dialog haveged nano net-tools netctl openssh raspberrypi-bootloader raspberrypi-bootloader-x vi which wireless_tools wpa_supplicant
-          $env.BUILDER_ENV/rm /mnt/etc/resolv.conf
-          $env.TARGET_ENV/systemctl enable sshd systemd-networkd systemd-resolved systemd-timesyncd haveged
-          $env.TARGET_ENV/echo -e '[Match]\nName=en*\n\n[Network]\nDHCP=yes\nDNSSEC=no'>/etc/systemd/network/en.network
-          $env.TARGET_ENV/echo -e '[Match]\nName=eth*\n\n[Network]\nDHCP=yes\nDNSSEC=no'>/etc/systemd/network/eth.network
-          $env.TARGET_ENV/echo '/dev/mmcblk0p1  /boot   vfat    defaults        0       0'>>/etc/fstab
-          $env.TARGET_ENV/echo 'alarm'>/etc/hostname
-          $env.TARGET_ENV/echo 'LANG=C'>/etc/locale.conf
-          $env.TARGET_ENV/echo "root:root" | chpasswd
-          $env.TARGET_ENV/useradd -d /home/alarm -m -U -p `openssl passwd -6 alarm` alarm
-          $env.TARGET_ENV/ln -s /run/systemd/resolve/resolv.conf /etc/resolv.conf
+          ${{ env.BUILDER_ENV }}/bash pacstrap -cGM /mnt base linux-raspberrypi4 crda dhcpcd dialog haveged nano net-tools netctl openssh raspberrypi-bootloader raspberrypi-bootloader-x vi which wireless_tools wpa_supplicant
+          ${{ env.BUILDER_ENV }}/rm /mnt/etc/resolv.conf
+          ${{ env.TARGET_ENV}}/systemctl enable sshd systemd-networkd systemd-resolved systemd-timesyncd haveged
+          ${{ env.TARGET_ENV}}/echo -e '[Match]\nName=en*\n\n[Network]\nDHCP=yes\nDNSSEC=no'>/etc/systemd/network/en.network
+          ${{ env.TARGET_ENV}}/echo -e '[Match]\nName=eth*\n\n[Network]\nDHCP=yes\nDNSSEC=no'>/etc/systemd/network/eth.network
+          ${{ env.TARGET_ENV}}/echo '/dev/mmcblk0p1  /boot   vfat    defaults        0       0'>>/etc/fstab
+          ${{ env.TARGET_ENV}}/echo 'alarm'>/etc/hostname
+          ${{ env.TARGET_ENV}}/echo 'LANG=C'>/etc/locale.conf
+          ${{ env.TARGET_ENV}}/echo "root:root" | chpasswd
+          ${{ env.TARGET_ENV}}/useradd -d /home/alarm -m -U -p `openssl passwd -6 alarm` alarm
+          ${{ env.TARGET_ENV}}/ln -s /run/systemd/resolve/resolv.conf /etc/resolv.conf
 
       - name: package target
         run: |
-          $env.BUILDER_ENV/rm -rf /mnt/etc/*- /mnt/root/.bash_history /mnt/root/.gnupg /mnt/var/log/* /mnt/var/lib/systemd/* 
-          $env.BUILDER_ENV/bsdtar -czpf /ArchLinuxARM-rpi-4-aarch64-latest.tar.gz -C /mnt/ . --exclude lost+found
-          $env.BUILDER_ENV/losetup -d /dev/loop10
-          $env.BUILDER_ENV/zip ArchLinuxARM-rpi-4-aarch64-latest.img.zip ArchLinuxARM-rpi-4-aarch64-latest.img
+          ${{ env.BUILDER_ENV }}/rm -rf /mnt/etc/*- /mnt/root/.bash_history /mnt/root/.gnupg /mnt/var/log/* /mnt/var/lib/systemd/* 
+          ${{ env.BUILDER_ENV }}/bsdtar -czpf /ArchLinuxARM-rpi-4-aarch64-latest.tar.gz -C /mnt/ . --exclude lost+found
+          ${{ env.BUILDER_ENV }}/losetup -d /dev/loop10
+          ${{ env.BUILDER_ENV }}/zip ArchLinuxARM-rpi-4-aarch64-latest.img.zip ArchLinuxARM-rpi-4-aarch64-latest.img
 
       - name: generate release
         run: |
