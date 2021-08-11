@@ -65,6 +65,8 @@ jobs:
           ${{ env.TARGET_ENV}} "useradd -d /home/alarm -m -U alarm"
           ${{ env.TARGET_ENV}} "echo "alarm:alarm" | chpasswd"
           ${{ env.TARGET_ENV}} "ln -s /run/systemd/resolve/resolv.conf /etc/resolv.conf"
+          ${{ env.TARGET_ENV}} "usermod -a -G wheel alarm"
+          ${{ env.TARGET_ENV}} "echo -n > /etc/machine-id"
 
       - name: package target
         run: |
