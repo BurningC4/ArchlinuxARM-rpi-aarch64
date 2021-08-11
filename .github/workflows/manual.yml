@@ -47,9 +47,9 @@ jobs:
           sudo losetup --partscan /dev/loop10 ArchLinuxARM-rpi-4-aarch64-latest.img
           sudo mkfs.vfat -F 32 /dev/loop10p1
           sudo mkfs.ext4 /dev/loop10p2
-          ${{ env.BUILDER_ENV }}mkdir -p /mnt/boot
-          ${{ env.BUILDER_ENV }}mount /dev/loop10p2 /mnt
-          ${{ env.BUILDER_ENV }}mount /dev/loop10p1 /mnt/boot
+          ${{ env.BUILDER_ENV }}/mkdir -p /mnt/boot
+          ${{ env.BUILDER_ENV }}/mount /dev/loop10p2 /mnt
+          ${{ env.BUILDER_ENV }}/mount /dev/loop10p1 /mnt/boot
 
       - name: generate target
         run: |
