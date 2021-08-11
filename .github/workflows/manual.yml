@@ -19,8 +19,7 @@ jobs:
     steps:
       - name: Set variables
         run: |
-          echo "TAG_NAME=$(date +%Y%m%d)" >> $GITHUB_ENV
-          echo "RELEASE_NAME=$(date +%Y%m%d)" >> $GITHUB_ENV
+          echo "RELEASE=$(date +%Y%m%d)" >> $GITHUB_ENV
         shell: bash
 
       - name: checkout repo
@@ -83,8 +82,11 @@ jobs:
           sha256sum ./release/ArchLinuxARM-rpi-4-aarch64-latest.img.zip > ./release/ArchLinuxARM-rpi-4-aarch64-latest.img.zip.sha256sum
 
       - name: delete old release
-        uses: ame-yu/action-delete-latest-release@v2
+        uses: dev-drprasad/delete-tag-and-release@v0.2.0
         with:
+          delete_release: true
+          tag_name: latest
+        env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create a release
@@ -93,10 +95,12 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ env.TAG_NAME }}
-          release_name: ${{ env.RELEASE_NAME }}
+          tag_name: latest
+          release_name: latest
           draft: false
           prerelease: false
+          body: |
+            ${{ env.RELEASE  }}
 
       - name: Upload ArchLinuxARM-rpi-4-aarch64-latest.tar.gz
         uses: actions/upload-release-asset@v1
