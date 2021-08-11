@@ -38,19 +38,19 @@ jobs:
 
       - name: generate img file
         run: |
-          ${{ env.BUILDER_ENV }}/dd if=/dev/zero of=ArchLinuxARM-rpi-4-aarch64-latest.img bs=4000 count=1000000
-          ${{ env.BUILDER_ENV }}/losetup --partscan -f ArchLinuxARM-rpi-4-aarch64-latest.img
-          ${{ env.BUILDER_ENV }}/parted -s /dev/loop10 mklabel msdos
-          ${{ env.BUILDER_ENV }}/parted -s /dev/loop10 mkpart primary fat32 2048s 411647s
-          ${{ env.BUILDER_ENV }}/parted -s /dev/loop10 mkpart primary ext4 411648s 100%
-          ${{ env.BUILDER_ENV }}/losetup -d /dev/loop10
-          ${{ env.BUILDER_ENV }}/losetup --partscan /dev/loop10 ArchLinuxARM-rpi-4-aarch64-latest.img
-          ${{ env.BUILDER_ENV }}/mkfs.vfat -F 32 /dev/loop10p1
-          ${{ env.BUILDER_ENV }}/mkfs.ext4 /dev/loop10p2
-          ${{ env.BUILDER_ENV }}/mkdir -p /mnt/boot
-          ${{ env.BUILDER_ENV }}/mount /dev/loop10p2 /mnt
-          ${{ env.BUILDER_ENV }}/mkdir -p /mnt/boot
-          ${{ env.BUILDER_ENV }}/mount /dev/loop10p1 /mnt/boot
+          dd if=/dev/zero of=ArchLinuxARM-rpi-4-aarch64-latest.img bs=4000 count=1000000
+          sudo losetup --partscan /dev/loop10 ArchLinuxARM-rpi-4-aarch64-latest.img
+          sudo parted -s /dev/loop10 mklabel msdos
+          sudo parted -s /dev/loop10 mkpart primary fat32 2048s 411647s
+          sudo parted -s /dev/loop10 mkpart primary ext4 411648s 100%
+          sudo losetup -d /dev/loop10
+          sudo losetup --partscan /dev/loop10 ArchLinuxARM-rpi-4-aarch64-latest.img
+          sudo mkfs.vfat -F 32 /dev/loop10p1
+          sudo mkfs.ext4 /dev/loop10p2
+          sudo mkdir -p ./builder/mnt/boot
+          sudo mount /dev/loop10p2 /mnt
+          sudo mkdir -p ./builder/mnt/boot
+          sudo mount /dev/loop10p1 /mnt/boot
 
       - name: generate target
         run: |
@@ -70,14 +70,14 @@ jobs:
         run: |
           ${{ env.BUILDER_ENV }}/rm -rf /mnt/etc/*- /mnt/root/.bash_history /mnt/root/.gnupg /mnt/var/log/* /mnt/var/lib/systemd/* 
           ${{ env.BUILDER_ENV }}/bsdtar -czpf /ArchLinuxARM-rpi-4-aarch64-latest.tar.gz -C /mnt/ . --exclude lost+found
-          ${{ env.BUILDER_ENV }}/losetup -d /dev/loop10
-          ${{ env.BUILDER_ENV }}/zip ArchLinuxARM-rpi-4-aarch64-latest.img.zip ArchLinuxARM-rpi-4-aarch64-latest.img
+          losetup -d /dev/loop10
+          zip ArchLinuxARM-rpi-4-aarch64-latest.img.zip ArchLinuxARM-rpi-4-aarch64-latest.img
 
       - name: generate release
         run: |
           mkdir ./release
           sudo mv ./builder/ArchLinuxARM-rpi-4-aarch64-latest.tar.gz ./release/ArchLinuxARM-rpi-4-aarch64-latest.tar.gz
-          sudo mv ./builder/ArchLinuxARM-rpi-4-aarch64-latest.img.zip ./release/ArchLinuxARM-rpi-4-aarch64-latest.img.zip
+          sudo mv ./ArchLinuxARM-rpi-4-aarch64-latest.img.zip ./release/ArchLinuxARM-rpi-4-aarch64-latest.img.zip
           sha256sum ./release/ArchLinuxARM-rpi-4-aarch64-latest.tar.gz > ./release/ArchLinuxARM-rpi-4-aarch64-latest.tar.gz.sha256sum
           sha256sum ./release/ArchLinuxARM-rpi-4-aarch64-latest.img.zip > ./release/ArchLinuxARM-rpi-4-aarch64-latest.img.zip.sha256sum
 
