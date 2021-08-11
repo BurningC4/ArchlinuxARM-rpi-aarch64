@@ -31,48 +31,53 @@ jobs:
           sudo bsdtar -xpf ./ArchLinuxARM-aarch64-latest.tar.gz -C ./builder
           sudo cp /usr/bin/qemu-aarch64-static ./builder/usr/bin/qemu-aarch64-static
           sudo cp -f ./pacman.conf ./builder/etc/pacman.conf
-          sudo cp ./prepare-target.sh ./builder/prepare-target.sh
-          sudo cp ./set-target.sh ./builder/set-target.sh
-          sudo cp ./package-target.sh ./builder/package-target.sh
           cat ./builder/etc/pacman.conf
-
-      - name: prepare builder
-        run: |
-          sudo arch-chroot ./builder qemu-aarch64-static /usr/bin/bash /prepare-target.sh
-
-      - name: generate target
-        run: |
-          sudo arch-chroot ./builder qemu-aarch64-static /usr/bin/bash /set-target.sh
-
-      - name: package target
-        run: |
-          sudo arch-chroot ./builder qemu-aarch64-static /usr/bin/bash /package-target.sh
+          BUILDER_ENV='sudo arch-chroot ./builder qemu-aarch64-static /usr/bin'
+          TARGET_ENV='$BUILDER_ENV/bash arch-chroot /mnt'
+          $BUILDER_ENV/pacman -Sy --ask=4 arch-install-scripts
 
       - name: generate img file
         run: |
+          $BUILDER_ENV/dd if=/dev/zero of=ArchLinuxARM-rpi-4-aarch64-latest.img bs=4000 count=1000000
+          $BUILDER_ENV/losetup --partscan /dev/loop10 ArchLinuxARM-rpi-4-aarch64-latest.img
+          $BUILDER_ENV/parted -s /dev/loop10 mklabel msdos
+          $BUILDER_ENV/parted -s /dev/loop10 mkpart primary fat32 2048s 411647s
+          $BUILDER_ENV/parted -s /dev/loop10 mkpart primary ext4 411648s 100%
+          $BUILDER_ENV/losetup -d /dev/loop10
+          $BUILDER_ENV/losetup --partscan /dev/loop10 ArchLinuxARM-rpi-4-aarch64-latest.img
+          $BUILDER_ENV/mkfs.vfat -F 32 /dev/loop10p1
+          $BUILDER_ENV/mkfs.ext4 /dev/loop10p2
+          $BUILDER_ENV/mkdir -p /mnt/boot
+          $BUILDER_ENV/mount /dev/loop10p2 /mnt
+          $BUILDER_ENV/mkdir -p /mnt/boot
+          $BUILDER_ENV/mount /dev/loop10p1 /mnt/boot
+
+      - name: generate target
+        run: |
+          $BUILDER_ENV/bash pacstrap -cGM /mnt base linux-raspberrypi4 crda dhcpcd dialog haveged nano net-tools netctl openssh raspberrypi-bootloader raspberrypi-bootloader-x vi which wireless_tools wpa_supplicant
+          $BUILDER_ENV/rm /mnt/etc/resolv.conf
+          $TARGET_ENV/systemctl enable sshd systemd-networkd systemd-resolved systemd-timesyncd haveged
+          $TARGET_ENV/echo -e '[Match]\nName=en*\n\n[Network]\nDHCP=yes\nDNSSEC=no'>/etc/systemd/network/en.network
+          $TARGET_ENV/echo -e '[Match]\nName=eth*\n\n[Network]\nDHCP=yes\nDNSSEC=no'>/etc/systemd/network/eth.network
+          $TARGET_ENV/echo '/dev/mmcblk0p1  /boot   vfat    defaults        0       0'>>/etc/fstab
+          $TARGET_ENV/echo 'alarm'>/etc/hostname
+          $TARGET_ENV/echo 'LANG=C'>/etc/locale.conf
+          $TARGET_ENV/echo "root:root" | chpasswd
+          $TARGET_ENV/useradd -d /home/alarm -m -U -p `openssl passwd -6 alarm` alarm
+          $TARGET_ENV/ln -s /run/systemd/resolve/resolv.conf /etc/resolv.conf
+
+      - name: package target
+        run: |
+          $BUILDER_ENV/rm -rf /mnt/etc/*- /mnt/root/.bash_history /mnt/root/.gnupg /mnt/var/log/* /mnt/var/lib/systemd/* 
+          $BUILDER_ENV/bsdtar -czpf /ArchLinuxARM-rpi-4-aarch64-latest.tar.gz -C /mnt/ . --exclude lost+found
+          $BUILDER_ENV/losetup -d /dev/loop10
+          $BUILDER_ENV/zip ArchLinuxARM-rpi-4-aarch64-latest.img.zip ArchLinuxARM-rpi-4-aarch64-latest.img
+
+      - name: generate release
+        run: |
           mkdir ./release
           sudo mv ./builder/ArchLinuxARM-rpi-4-aarch64-latest.tar.gz ./release/ArchLinuxARM-rpi-4-aarch64-latest.tar.gz
-          sudo dd if=/dev/zero of=ArchLinuxARM-rpi-4-aarch64-latest.img bs=4000 count=1000000
-          sudo losetup --partscan /dev/loop10 ArchLinuxARM-rpi-4-aarch64-latest.img
-          sudo parted -s /dev/loop10 mklabel msdos
-          sudo parted -s /dev/loop10 mkpart primary fat32 2048s 411647s
-          sudo parted -s /dev/loop10 mkpart primary ext4 411648s 100%
-          sudo losetup -d /dev/loop10
-          sudo losetup --partscan /dev/loop10 ArchLinuxARM-rpi-4-aarch64-latest.img
-          sudo mkfs.vfat -F 32 /dev/loop10p1
-          sudo mkfs.ext4 /dev/loop10p2
-          sudo mkdir -p image/root
-          sudo mount /dev/loop10p2 image/root
-          sudo mkdir -p image/root/boot
-          sudo mount /dev/loop10p1 image/root/boot
-          sudo bsdtar -xpf ArchLinuxARM-rpi-4-aarch64-latest.tar.gz -C image/root
-          sudo sync
-          sudo umount -R image/root
-          sudo losetup -d /dev/loop10
-          sudo zip ./release/ArchLinuxARM-rpi-4-aarch64-latest.img.zip ArchLinuxARM-rpi-4-aarch64-latest.img
-
-      - name: generate sha256 hash
-        run: |
+          sudo mv ./builder/ArchLinuxARM-rpi-4-aarch64-latest.img.zip ./release/ArchLinuxARM-rpi-4-aarch64-latest.img.zip
           sha256sum ./release/ArchLinuxARM-rpi-4-aarch64-latest.tar.gz > ./release/ArchLinuxARM-rpi-4-aarch64-latest.tar.gz.sha256sum
           sha256sum ./release/ArchLinuxARM-rpi-4-aarch64-latest.img.zip > ./release/ArchLinuxARM-rpi-4-aarch64-latest.img.zip.sha256sum
 
