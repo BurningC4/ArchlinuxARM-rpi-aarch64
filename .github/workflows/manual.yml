@@ -48,9 +48,8 @@ jobs:
           sudo mkfs.vfat -F 32 /dev/loop10p1
           sudo mkfs.ext4 /dev/loop10p2
           sudo mkdir -p ./builder/mnt/boot
-          sudo mount /dev/loop10p2 /mnt
-          sudo mkdir -p ./builder/mnt/boot
-          sudo mount /dev/loop10p1 /mnt/boot
+          sudo mount /dev/loop10p2 ./builder/mnt
+          sudo mount /dev/loop10p1 ./builder/mnt/boot
 
       - name: generate target
         run: |
