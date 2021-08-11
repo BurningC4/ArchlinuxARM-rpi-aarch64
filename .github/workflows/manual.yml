@@ -16,12 +16,16 @@ jobs:
     env: 
       BUILDER_ENV: 'sudo arch-chroot ./builder qemu-aarch64-static /usr/bin/bash -c'
       TARGET_ENV: 'sudo arch-chroot ./builder qemu-aarch64-static /usr/bin/bash arch-chroot /mnt /usr/bin/bash -c'
-      RELEASE: '$(date +%Y%m%d)'
-      DEVICE: '$(losetup -f)'
 
     steps:
       - name: checkout repo
         uses: actions/checkout@v2
+
+      - name: Set variables
+        run: |
+          echo DEVICE=$(losetup -f) >> $GITHUB_ENV
+          echo RELEASE=$(date +%Y%m%d) >> $GITHUB_ENV
+        shell: bash
 
       - name: generate builder
         run: |
