@@ -17,6 +17,9 @@ jobs:
       BUILD_SH: 'sudo arch-chroot ./builder qemu-aarch64-static /usr/bin/bash -c'
       TARGET_SH: 'sudo arch-chroot ./builder qemu-aarch64-static /usr/bin/bash arch-chroot /mnt /usr/bin/bash -c'
       IMG_NAME: 'ArchLinuxARM-rpi-4-aarch64-latest'
+      LC_ALL: 'C'
+      LANG: 'C'
+      LANGUAGE: ''
 
     steps:
       - name: delete old release
