@@ -14,8 +14,9 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env: 
-      BUILDER_ENV: 'sudo arch-chroot ./builder qemu-aarch64-static /usr/bin/bash -c'
-      TARGET_ENV: 'sudo arch-chroot ./builder qemu-aarch64-static /usr/bin/bash arch-chroot /mnt /usr/bin/bash -c'
+      BUILD_SH: 'sudo arch-chroot ./builder qemu-aarch64-static /usr/bin/bash -c'
+      TARGET_SH: 'sudo arch-chroot ./builder qemu-aarch64-static /usr/bin/bash arch-chroot /mnt /usr/bin/bash -c'
+      IMG_NAME: 'ArchLinuxARM-rpi-4-aarch64-latest'
 
     steps:
       - name: checkout repo
@@ -23,7 +24,7 @@ jobs:
 
       - name: Set variables
         run: |
-          echo DEVICE=$(losetup -f) >> $GITHUB_ENV
+          echo V_SD=$(losetup -f) >> $GITHUB_ENV
           echo RELEASE=$(date +%Y%m%d) >> $GITHUB_ENV
         shell: bash
 
@@ -35,55 +36,59 @@ jobs:
           sudo bsdtar -xpf ./ArchLinuxARM-aarch64-latest.tar.gz -C ./builder
           sudo cp /usr/bin/qemu-aarch64-static ./builder/usr/bin/qemu-aarch64-static
           sudo cp -f ./pacman.conf ./builder/etc/pacman.conf
-          echo PACKAGES=$(cat package.md) >> $GITHUB_ENV
-          ${{ env.BUILDER_ENV }} "pacman -Sy --ask=4 arch-install-scripts"
+          ${{ env.BUILD_SH }} "pacman -Sy --ask=4 arch-install-scripts"
+        shell: bash
 
       - name: prepare image file
         run: |
-          dd if=/dev/zero of=ArchLinuxARM-rpi-4-aarch64-latest.img bs=4000 count=1000000
-          sudo losetup --partscan ${{ env.DEVICE }} ArchLinuxARM-rpi-4-aarch64-latest.img
-          sudo parted -s ${{ env.DEVICE }} mklabel msdos
-          sudo parted -s ${{ env.DEVICE }} mkpart primary fat32 2048s 411647s
-          sudo parted -s ${{ env.DEVICE }} mkpart primary ext4 411648s 100%
-          sudo mkfs.vfat -F 32 ${{ env.DEVICE }}p1
-          sudo mkfs.ext4 ${{ env.DEVICE }}p2
-          ${{ env.BUILDER_ENV }} "mount ${{ env.DEVICE }}p2 /mnt"
-          ${{ env.BUILDER_ENV }} "mkdir -p /mnt/boot"
-          ${{ env.BUILDER_ENV }} "mount ${{ env.DEVICE }}p1 /mnt/boot"
+          dd if=/dev/zero of=${{ env.IMG_NAME }}.img bs=4000 count=1000000
+          sudo losetup --partscan ${{ env.V_SD }} ${{ env.IMG_NAME }}.img
+          sudo parted -s ${{ env.V_SD }} mklabel msdos
+          sudo parted -s ${{ env.V_SD }} mkpart primary fat32 2048s 411647s
+          sudo parted -s ${{ env.V_SD }} mkpart primary ext4 411648s 100%
+          sudo mkfs.vfat -F 32 ${{ env.V_SD }}p1
+          sudo mkfs.ext4 ${{ env.V_SD }}p2
+          ${{ env.BUILD_SH }} "mount ${{ env.V_SD }}p2 /mnt"
+          ${{ env.BUILD_SH }} "mkdir -p /mnt/boot"
+          ${{ env.BUILD_SH }} "mount ${{ env.V_SD }}p1 /mnt/boot"
+        shell: bash
 
       - name: generate target
         run: |
-          ${{ env.BUILDER_ENV }} "pacstrap -cGM /mnt ${{ env.PACKAGES }}"
-          ${{ env.BUILDER_ENV }} "rm /mnt/etc/resolv.conf"
-          ${{ env.TARGET_ENV}} systemctl enable sshd systemd-networkd systemd-resolved systemd-timesyncd haveged
-          ${{ env.TARGET_ENV}} "echo -e '[Match]\nName=en*\n\n[Network]\nDHCP=yes\nDNSSEC=no'>/etc/systemd/network/en.network"
-          ${{ env.TARGET_ENV}} "echo -e '[Match]\nName=eth*\n\n[Network]\nDHCP=yes\nDNSSEC=no'>/etc/systemd/network/eth.network"
-          ${{ env.TARGET_ENV}} "echo '/dev/mmcblk0p1  /boot   vfat    defaults        0       0'>>/etc/fstab"
-          ${{ env.TARGET_ENV}} "echo 'alarm'>/etc/hostname"
-          ${{ env.TARGET_ENV}} "echo 'LANG=C'>/etc/locale.conf"
-          ${{ env.TARGET_ENV}} "echo "root:root" | chpasswd"
-          ${{ env.TARGET_ENV}} "useradd -d /home/alarm -m -U alarm"
-          ${{ env.TARGET_ENV}} "echo "alarm:alarm" | chpasswd"
-          ${{ env.TARGET_ENV}} "ln -s /run/systemd/resolve/resolv.conf /etc/resolv.conf"
-          ${{ env.TARGET_ENV}} "usermod -a -G wheel alarm"
-          ${{ env.TARGET_ENV}} "echo -n > /etc/machine-id"
+          ${{ env.BUILD_SH }} "pacstrap -cGM /mnt $(cat packages.md)"
+          ${{ env.BUILD_SH }} "rm /mnt/etc/resolv.conf"
+          ${{ env.TARGET_SH }} "systemctl enable $(cat services.md)"
+          ${{ env.TARGET_SH }} "echo -e '[Match]\nName=en*\n\n[Network]\nDHCP=yes\nDNSSEC=no'>/etc/systemd/network/en.network"
+          ${{ env.TARGET_SH }} "echo -e '[Match]\nName=eth*\n\n[Network]\nDHCP=yes\nDNSSEC=no'>/etc/systemd/network/eth.network"
+          ${{ env.TARGET_SH }} "echo '/dev/mmcblk0p1  /boot   vfat    defaults        0       0'>>/etc/fstab"
+          ${{ env.TARGET_SH }} "echo 'alarm'>/etc/hostname"
+          ${{ env.TARGET_SH }} "echo 'LANG=C'>/etc/locale.conf"
+          ${{ env.TARGET_SH }} "echo "root:root" | chpasswd"
+          ${{ env.TARGET_SH }} "useradd -d /home/alarm -m -U alarm"
+          ${{ env.TARGET_SH }} "echo "alarm:alarm" | chpasswd"
+          ${{ env.TARGET_SH }} "ln -s /run/systemd/resolve/resolv.conf /etc/resolv.conf"
+          ${{ env.TARGET_SH }} "usermod -a -G wheel alarm"
+          ${{ env.TARGET_SH }} "echo -n > /etc/machine-id"
+        shell: bash
 
       - name: package target
         run: |
-          ${{ env.BUILDER_ENV }} "rm -rf /mnt/etc/*- /mnt/root/.bash_history /mnt/root/.gnupg /mnt/var/log/* /mnt/var/lib/systemd/* "
-          ${{ env.BUILDER_ENV }} "sync"
-          ${{ env.BUILDER_ENV }} "bsdtar --exclude 'lost+found' -czpf /ArchLinuxARM-rpi-4-aarch64-latest.tar.gz -C /mnt/ ."
-          ${{ env.BUILDER_ENV }} "umount -R /mnt"
-          sudo losetup -d ${{ env.DEVICE }}
-          zip ArchLinuxARM-rpi-4-aarch64-latest.img.zip ArchLinuxARM-rpi-4-aarch64-latest.img
+          ${{ env.BUILD_SH }} "rm -rf /mnt/etc/*- /mnt/root/.bash_history /mnt/root/.gnupg /mnt/var/log/* /mnt/var/lib/systemd/* "
+          ${{ env.BUILD_SH }} "sync"
+          ${{ env.BUILD_SH }} "bsdtar --exclude 'lost+found' -czpf /${{ env.IMG_NAME }}.tar.gz -C /mnt/ ."
+          ${{ env.BUILD_SH }} "umount -R /mnt"
+          sudo losetup -d ${{ env.V_SD }}
+          zip ${{ env.IMG_NAME }}.img.zip ${{ IMG_NAME }}.img
+        shell: bash
 
       - name: generate release
         run: |
           mkdir ./release
-          sudo mv ./builder/ArchLinuxARM-rpi-4-aarch64-latest.tar.gz ./release/ArchLinuxARM-rpi-4-aarch64-latest.tar.gz
-          sudo mv ./ArchLinuxARM-rpi-4-aarch64-latest.img.zip ./release/ArchLinuxARM-rpi-4-aarch64-latest.img.zip
-          sha256sum ./release/ArchLinuxARM-rpi-4-aarch64-latest.tar.gz > ./release/ArchLinuxARM-rpi-4-aarch64-latest.tar.gz.sha256sum
-          sha256sum ./release/ArchLinuxARM-rpi-4-aarch64-latest.img.zip > ./release/ArchLinuxARM-rpi-4-aarch64-latest.img.zip.sha256sum
+          sudo mv ./builder/${{ env.IMG_NAME }}.tar.gz ./release/${{ env.IMG_NAME }}.tar.gz
+          sudo mv ./${{ env.IMG_NAME }}.img.zip ./release/${{ env.IMG_NAME }}.img.zip
+          sha256sum ./release/${{ env.IMG_NAME }}.tar.gz > ./release/${{ env.IMG_NAME }}.tar.gz.sha256sum
+          sha256sum ./release/${{ env.IMG_NAME }}.img.zip > ./release/${{ env.IMG_NAME }}.img.zip.sha256sum
+        shell: bash
 
       - name: delete old release
         uses: dev-drprasad/delete-tag-and-release@v0.2.0
@@ -112,8 +117,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./release/ArchLinuxARM-rpi-4-aarch64-latest.tar.gz
-          asset_name: ArchLinuxARM-rpi-4-aarch64-latest.tar.gz
+          asset_path: ./release/${{ env.IMG_NAME }}.tar.gz
+          asset_name: ${{ env.IMG_NAME }}.tar.gz
           asset_content_type: application/gzip
 
       - name: Upload ArchLinuxARM-rpi-4-aarch64-latest.tar.gz.sha256sum
@@ -122,8 +127,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./release/ArchLinuxARM-rpi-4-aarch64-latest.tar.gz.sha256sum
-          asset_name: ArchLinuxARM-rpi-4-aarch64-latest.tar.gz.sha256sum
+          asset_path: ./release/${{ env.IMG_NAME }}.tar.gz.sha256sum
+          asset_name: ${{ env.IMG_NAME }}.tar.gz.sha256sum
           asset_content_type: text/plain
 
       - name: Upload ArchLinuxARM-rpi-4-aarch64-latest.img.zip
@@ -132,8 +137,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./release/ArchLinuxARM-rpi-4-aarch64-latest.img.zip
-          asset_name: ArchLinuxARM-rpi-4-aarch64-latest.img.zip
+          asset_path: ./release/${{ env.IMG_NAME }}.img.zip
+          asset_name: ${{ env.IMG_NAME }}.img.zip
           asset_content_type: application/gzip
 
       - name: Upload ArchLinuxARM-rpi-4-aarch64-latest.tar.gz.sha256sum
@@ -142,6 +147,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./release/ArchLinuxARM-rpi-4-aarch64-latest.img.zip.sha256sum
-          asset_name: ArchLinuxARM-rpi-4-aarch64-latest.img.zip.sha256sum
+          asset_path: ./release/${{ env.IMG_NAME }}.img.zip.sha256sum
+          asset_name: ${{ env.IMG_NAME }}.img.zip.sha256sum
           asset_content_type: text/plain
