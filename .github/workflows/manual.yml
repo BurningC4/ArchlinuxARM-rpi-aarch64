@@ -89,7 +89,7 @@ jobs:
 
       - name: create and enable resize2fs_once service
         run: |
-          ${{ env.TARGET_SH }} "echo -e '[Unit]\nDescription=Resize the root filesystem to fill partition\n\n[Service]\nType=oneshot\nExecStart=/usr/sbin/resize2fs \$(/usr/bin/findmnt / -o source -n)\nExecStartPost=/usr/bin/systemctl disable resize2fs_once.service ; /usr/bin/rm /lib/systemd/system/resize2fs_once.service\n\n[Install]\nWantedBy=multi-user.target' > /lib/systemd/system/resize2fs_once.service"
+          ${{ env.TARGET_SH }} "curl -L -o /lib/systemd/system/resize2fs_once.service https://github.com/BurningC4/ArchlinuxARM-rpi4-aarch64-builder/raw/main/resize2fs_once.service"
           ${{ env.TARGET_SH }} "systemctl enable resize2fs_once"
         shell: bash
 
