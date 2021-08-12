@@ -86,7 +86,6 @@ jobs:
           ${{ env.BUILD_SH }} "rm -rf /mnt/etc/*- /mnt/root/.bash_history /mnt/root/.gnupg /mnt/var/log/* /mnt/var/lib/systemd/* "
           ${{ env.BUILD_SH }} "sync"
           ${{ env.BUILD_SH }} "bsdtar --exclude 'lost+found' -czpf /${{ env.IMG_NAME }}.tar.gz -C /mnt/ ."
-          zip ${{ env.IMG_NAME }}.img.zip ${{ env.IMG_NAME }}.img
         shell: bash
 
       - name: create and enable resize2fs_once service
