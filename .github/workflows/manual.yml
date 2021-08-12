@@ -53,7 +53,7 @@ jobs:
           sudo losetup --partscan ${{ env.V_SD }} ${{ env.IMG_NAME }}.img
           sudo parted -s ${{ env.V_SD }} mklabel msdos
           sudo parted -s ${{ env.V_SD }} mkpart primary fat32 2048s 411647s
-          sudo parted -s ${{ env.V_SD }} mkpart primary ext4 411648s 100%
+          sudo parted -s ${{ env.V_SD }} mkpart primary ext4 411648s 7812499s
           sudo mkfs.vfat -F 32 ${{ env.V_SD }}p1
           sudo mkfs.ext4 ${{ env.V_SD }}p2
           ${{ env.BUILD_SH }} "mount ${{ env.V_SD }}p2 /mnt"
