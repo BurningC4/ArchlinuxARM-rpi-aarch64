@@ -79,11 +79,24 @@ jobs:
           ${{ env.TARGET_SH }} "echo -n > /etc/machine-id"
         shell: bash
 
-      - name: package target
+      - name: clean and create compressed file
         run: |
           ${{ env.BUILD_SH }} "rm -rf /mnt/etc/*- /mnt/root/.bash_history /mnt/root/.gnupg /mnt/var/log/* /mnt/var/lib/systemd/* "
           ${{ env.BUILD_SH }} "sync"
           ${{ env.BUILD_SH }} "bsdtar --exclude 'lost+found' -czpf /${{ env.IMG_NAME }}.tar.gz -C /mnt/ ."
+          zip ${{ env.IMG_NAME }}.img.zip ${{ env.IMG_NAME }}.img
+        shell: bash
+
+      - name: create and enable resize2fs_once service
+        run: |
+          ${{ env.TARGET_SH }} "echo -e '[Unit]\nDescription=Resize the root filesystem to fill partition\n\n[Service]\nType=oneshot\nExecStart=/usr/sbin/resize2fs \$(/usr/bin/findmnt / -o source -n)\nExecStartPost=/usr/bin/systemctl disable resize2fs_once.service ; /usr/bin/rm /lib/systemd/system/resize2fs_once.service\n\n[Install]\nWantedBy=multi-user.target' > /lib/systemd/system/resize2fs_once.service"
+          ${{ env.TARGET_SH }} "systemctl enable resize2fs_once"
+        shell: bash
+
+      - name: clean and package img file
+        run: |
+          ${{ env.BUILD_SH }} "rm -rf /mnt/etc/*- /mnt/root/.bash_history /mnt/root/.gnupg /mnt/var/log/* /mnt/var/lib/systemd/* "
+          ${{ env.BUILD_SH }} "sync"
           ${{ env.BUILD_SH }} "umount -R /mnt"
           sudo losetup -d ${{ env.V_SD }}
           zip ${{ env.IMG_NAME }}.img.zip ${{ env.IMG_NAME }}.img
