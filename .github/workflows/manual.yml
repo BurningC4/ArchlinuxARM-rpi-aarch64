@@ -65,18 +65,17 @@ jobs:
         run: |
           ${{ env.BUILD_SH }} "pacstrap -cGM /mnt $(cat packages.md)"
           ${{ env.BUILD_SH }} "rm /mnt/etc/resolv.conf"
+          ${{ env.BUILD_SH }} "ln -s /run/systemd/resolve/resolv.conf /mnt/etc/resolv.conf"
+          ${{ env.BUILD_SH }} "echo -e '[Match]\nName=en*\n\n[Network]\nDHCP=yes\nDNSSEC=no'>/mnt/etc/systemd/network/en.network"
+          ${{ env.BUILD_SH }} "echo -e '[Match]\nName=eth*\n\n[Network]\nDHCP=yes\nDNSSEC=no'>/mnt/etc/systemd/network/eth.network"
+          ${{ env.BUILD_SH }} "echo '/dev/mmcblk0p1  /boot   vfat    defaults        0       0'>>/mnt/etc/fstab"
+          ${{ env.BUILD_SH }} "echo 'alarm'>/mnt/etc/hostname"
+          ${{ env.BUILD_SH }} "echo 'LANG=C'>/mnt/etc/locale.conf"
+          ${{ env.BUILD_SH }} "useradd -d /home/alarm -m -U alarm --root /mnt"
+          ${{ env.BUILD_SH }} "echo -e "root:root\nalarm:alarm" | chpasswd"
+          ${{ env.BUILD_SH }} "usermod -a -G wheel alarm --root /mnt"
+          ${{ env.BUILD_SH }} "echo -n > /mnt/etc/machine-id"
           ${{ env.TARGET_SH }} "systemctl enable $(cat services.md)"
-          ${{ env.TARGET_SH }} "echo -e '[Match]\nName=en*\n\n[Network]\nDHCP=yes\nDNSSEC=no'>/etc/systemd/network/en.network"
-          ${{ env.TARGET_SH }} "echo -e '[Match]\nName=eth*\n\n[Network]\nDHCP=yes\nDNSSEC=no'>/etc/systemd/network/eth.network"
-          ${{ env.TARGET_SH }} "echo '/dev/mmcblk0p1  /boot   vfat    defaults        0       0'>>/etc/fstab"
-          ${{ env.TARGET_SH }} "echo 'alarm'>/etc/hostname"
-          ${{ env.TARGET_SH }} "echo 'LANG=C'>/etc/locale.conf"
-          ${{ env.TARGET_SH }} "echo "root:root" | chpasswd"
-          ${{ env.TARGET_SH }} "useradd -d /home/alarm -m -U alarm"
-          ${{ env.TARGET_SH }} "echo "alarm:alarm" | chpasswd"
-          ${{ env.TARGET_SH }} "ln -s /run/systemd/resolve/resolv.conf /etc/resolv.conf"
-          ${{ env.TARGET_SH }} "usermod -a -G wheel alarm"
-          ${{ env.TARGET_SH }} "echo -n > /etc/machine-id"
         shell: bash
 
       - name: clean and create compressed file
@@ -90,7 +89,7 @@ jobs:
 
       - name: create and enable resize2fs_once service
         run: |
-          ${{ env.TARGET_SH }} "curl -L -o /lib/systemd/system/resize2fs_once.service https://github.com/BurningC4/ArchlinuxARM-rpi4-aarch64-builder/raw/main/resize2fs_once.service"
+          ${{ env.BUILD_SH }} "curl -L -o /mnt/lib/systemd/system/resize2fs_once.service https://github.com/BurningC4/ArchlinuxARM-rpi4-aarch64-builder/raw/main/resize2fs_once.service"
           ${{ env.TARGET_SH }} "systemctl enable resize2fs_once"
         shell: bash
 
