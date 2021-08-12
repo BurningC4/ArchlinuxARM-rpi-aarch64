@@ -19,6 +19,14 @@ jobs:
       IMG_NAME: 'ArchLinuxARM-rpi-4-aarch64-latest'
 
     steps:
+      - name: delete old release
+        uses: dev-drprasad/delete-tag-and-release@v0.2.0
+        with:
+          delete_release: true
+          tag_name: latest
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: checkout repo
         uses: actions/checkout@v2
 
@@ -89,14 +97,6 @@ jobs:
           sha256sum ./release/${{ env.IMG_NAME }}.tar.gz > ./release/${{ env.IMG_NAME }}.tar.gz.sha256sum
           sha256sum ./release/${{ env.IMG_NAME }}.img.zip > ./release/${{ env.IMG_NAME }}.img.zip.sha256sum
         shell: bash
-
-      - name: delete old release
-        uses: dev-drprasad/delete-tag-and-release@v0.2.0
-        with:
-          delete_release: true
-          tag_name: latest
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create a release
         id: create_release
