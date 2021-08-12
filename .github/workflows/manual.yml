@@ -49,7 +49,7 @@ jobs:
 
       - name: prepare image file
         run: |
-          dd if=/dev/zero of=${{ env.IMG_NAME }}.img bs=4000 count=1000000
+          dd if=/dev/zero of=${{ env.IMG_NAME }}.img bs=4000000 count=1000
           sudo losetup --partscan ${{ env.V_SD }} ${{ env.IMG_NAME }}.img
           sudo parted -s ${{ env.V_SD }} mklabel msdos
           sudo parted -s ${{ env.V_SD }} mkpart primary fat32 2048s 411647s
