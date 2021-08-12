@@ -86,7 +86,7 @@ jobs:
           ${{ env.BUILD_SH }} "bsdtar --exclude 'lost+found' -czpf /${{ env.IMG_NAME }}.tar.gz -C /mnt/ ."
           ${{ env.BUILD_SH }} "umount -R /mnt"
           sudo losetup -d ${{ env.V_SD }}
-          zip ${{ env.IMG_NAME }}.img.zip ${{ IMG_NAME }}.img
+          zip ${{ env.IMG_NAME }}.img.zip ${{ env.IMG_NAME }}.img
         shell: bash
 
       - name: generate release
