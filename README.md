@@ -25,6 +25,25 @@
   ```
 
   基本相当于官方 **rpi-aarch64** 镜像安装了 **linux-raspberrypi4** 和 **raspberrypi-bootloader-x**
+  
+  ### IMG文件的额外订制
+  
+  添加并启用了 **resize2fs_once.service**
+  
+  ```
+  [Unit]
+  Description=Resize the root filesystem to fill partition
+
+  [Service]
+  Type=oneshot
+  ExecStart=/usr/bin/bash -c "/usr/sbin/resize2fs `/usr/bin/findmnt / -o source -n`"
+  ExecStartPost=/usr/bin/systemctl disable resize2fs_once.service ; /usr/bin/rm /lib/systemd/system/resize2fs_once.service
+
+  [Install]
+  WantedBy=multi-user.target
+  ```
+  
+  该文件会将 **root** 分区扩展至整张sd卡并在完成后将自身删除
 
  ## 使用方式
 
