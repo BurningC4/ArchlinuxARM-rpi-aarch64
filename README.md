@@ -14,11 +14,15 @@
 
  ## 安装了以下软件包及其依赖
 
-  ```base linux-raspberrypi4 raspberrypi-bootloader raspberrypi-bootloader-x crda dhcpcd dialog haveged nano net-tools netctl openssh vi which wireless_tools wpa_supplicant```
+  ```
+  base linux-raspberrypi4 raspberrypi-bootloader raspberrypi-bootloader-x crda dhcpcd dialog haveged nano net-tools netctl openssh vi which wireless_tools wpa_supplicant
+  ```
 
  ## 启用了以下服务
 
-  ```haveged sshd systemd-networkd systemd-resolved systemd-timesyncd```
+  ```
+  haveged sshd systemd-networkd systemd-resolved systemd-timesyncd
+  ```
 
   基本相当于官方 **rpi-aarch64** 镜像安装了 **linux-raspberrypi4** 和 **raspberrypi-bootloader-x**
 
