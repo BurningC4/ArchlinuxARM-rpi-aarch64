@@ -17,9 +17,6 @@ jobs:
       BUILD_SH: 'sudo arch-chroot ./builder qemu-aarch64-static /usr/bin/bash -c'
       TARGET_SH: 'sudo arch-chroot ./builder qemu-aarch64-static /usr/bin/bash arch-chroot /mnt /usr/bin/bash -c'
       IMG_NAME: 'ArchLinuxARM-rpi-4-aarch64-latest'
-      LC_ALL: 'C'
-      LANG: 'C'
-      LANGUAGE: ''
 
     steps:
       - name: delete old release
@@ -84,6 +81,7 @@ jobs:
 
       - name: clean and create compressed file
         run: |
+          ${{ env.BUILD_SH }} "export LC_ALL=C LANG=C LANGUAGE="
           ${{ env.BUILD_SH }} "rm -rf /mnt/etc/*- /mnt/root/.bash_history /mnt/root/.gnupg /mnt/var/log/* /mnt/var/lib/systemd/* "
           ${{ env.BUILD_SH }} "sync"
           ${{ env.BUILD_SH }} "bsdtar --exclude 'lost+found' -czpf /${{ env.IMG_NAME }}.tar.gz -C /mnt/ ."
