@@ -56,9 +56,10 @@ jobs:
           sudo parted -s ${{ env.V_SD }} mkpart primary ext4 411648s 7812499s
           sudo mkfs.vfat -F 32 ${{ env.V_SD }}p1
           sudo mkfs.ext4 ${{ env.V_SD }}p2
-          ${{ env.BUILD_SH }} "mount ${{ env.V_SD }}p2 /mnt"
+          ${{ env.BUILD_SH }} "tune2fs -O ^has_journal ${{ env.V_SD }}p2"
+          ${{ env.BUILD_SH }} "mount -o sync,noatime ${{ env.V_SD }}p2 /mnt"
           ${{ env.BUILD_SH }} "mkdir -p /mnt/boot"
-          ${{ env.BUILD_SH }} "mount ${{ env.V_SD }}p1 /mnt/boot"
+          ${{ env.BUILD_SH }} "mount -o sync,noatime ${{ env.V_SD }}p1 /mnt/boot"
         shell: bash
 
       - name: generate target
@@ -84,7 +85,6 @@ jobs:
           LANG=C
           LANGUAGE=
           ${{ env.BUILD_SH }} "rm -rf /mnt/etc/*- /mnt/root/.bash_history /mnt/root/.gnupg /mnt/var/log/* /mnt/var/lib/systemd/* "
-          ${{ env.BUILD_SH }} "sync"
           ${{ env.BUILD_SH }} "bsdtar --exclude 'lost+found' -czpf /${{ env.IMG_NAME }}.tar.gz -C /mnt/ ."
         shell: bash
 
@@ -97,8 +97,8 @@ jobs:
       - name: clean and package img file
         run: |
           ${{ env.BUILD_SH }} "rm -rf /mnt/etc/*- /mnt/root/.bash_history /mnt/root/.gnupg /mnt/var/log/* /mnt/var/lib/systemd/* "
-          ${{ env.BUILD_SH }} "sync"
           ${{ env.BUILD_SH }} "umount -R /mnt"
+          ${{ env.BUILD_SH }} "tune2fs -O has_journal ${{ env.V_SD }}p2"
           sudo losetup -d ${{ env.V_SD }}
           zip ${{ env.IMG_NAME }}.img.zip ${{ env.IMG_NAME }}.img
         shell: bash
