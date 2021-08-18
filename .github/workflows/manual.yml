@@ -90,7 +90,11 @@ jobs:
 
       - name: create and enable resize2fs_once service
         run: |
-          ${{ env.BUILD_SH }} "curl -L -o /mnt/lib/systemd/system/resize2fs_once.service https://github.com/BurningC4/ArchlinuxARM-rpi4-aarch64-builder/raw/main/resize2fs_once.service"
+          ${{ env.BUILD_SH }} "mkdir /mnt/usr/lib/init_resize"
+          ${{ env.BUILD_SH }} "curl -L -o /mnt/usr/lib/init_resize/init_resize.sh https://github.com/BurningC4/ArchlinuxARM-rpi4-aarch64-builder/raw/main/init_resize.sh"
+          ${{ env.BUILD_SH }} "curl -L -o /mnt/etc/systemd/system/resize2fs_once.service https://github.com/BurningC4/ArchlinuxARM-rpi4-aarch64-builder/raw/main/resize2fs_once.service"
+          ${{ env.BUILD_SH }} "chmod a+x /mnt/usr/lib/init_resize/init_resize.sh"
+          ${{ env.BUILD_SH }} "sed -i 's|$| init=/usr/lib/init_resize/init_resize\.sh|' /mnt/boot/cmdline.txt"
           ${{ env.TARGET_SH }} "systemctl enable resize2fs_once"
         shell: bash
 
