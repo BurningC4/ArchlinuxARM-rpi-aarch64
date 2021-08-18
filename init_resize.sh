@@ -95,7 +95,7 @@ main () {
     reboot_pi
   fi
 
-  if ! parted -m "$ROOT_DEV" u s resizepart "$ROOT_PART_NUM" "$TARGET_END"; then
+  if ! growpart "$ROOT_DEV" "$ROOT_PART_NUM"; then
     FAIL_REASON="Root partition resize failed"
     return 1
   fi
