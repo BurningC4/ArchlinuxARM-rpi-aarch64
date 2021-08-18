@@ -4,7 +4,7 @@ Description=Resize the root filesystem to fill partition
 [Service]
 Type=oneshot
 ExecStart=/usr/bin/bash -c "/usr/sbin/resize2fs `/usr/bin/findmnt / -o source -n`"
-ExecStartPost=/usr/bin/systemctl disable resize2fs_once.service ; /usr/bin/rm /lib/systemd/system/resize2fs_once.service
+ExecStartPost=/usr/bin/systemctl disable resize2fs_once.service ; /usr/bin/rm -rf /etc/systemd/system/resize2fs_once.service /usr/lib/init_resize
 
 [Install]
 WantedBy=multi-user.target
