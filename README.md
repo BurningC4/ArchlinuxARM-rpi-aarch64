@@ -45,9 +45,7 @@
   
   该文件会将 **root** 分区扩展至整张sd卡并在完成后将自身删除
   
-  添加了 **/usr/lib/init_resize/init_resize.sh** ，该文件在首次开机时通过 **cmdline.txt** 运行后会被 **resize2fs_once.service** 删除
-  
-  添加了来自 **cloud-guest-utils** 的 **growpart** ，该文件在首次开机时被 **init_resize.sh** 使用后后会被 **resize2fs_once.service** 删除
+  添加了来自 **cloud-guest-utils** 的 **growpart** ，该文件在首次开机时被 **resize2fs_once.service** 使用后删除
  
  ## 使用方式
 
