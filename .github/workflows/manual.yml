@@ -73,7 +73,7 @@ jobs:
           ${{ env.BUILD_SH }} "echo 'alarm'>/mnt/etc/hostname"
           ${{ env.BUILD_SH }} "echo 'LANG=C'>/mnt/etc/locale.conf"
           ${{ env.BUILD_SH }} "useradd -d /home/alarm -m -U alarm --root /mnt"
-          ${{ env.BUILD_SH }} "echo -e "root:root\nalarm:alarm" | chpasswd"
+          ${{ env.BUILD_SH }} "echo -e "root:root\nalarm:alarm" | chpasswd --root /mnt"
           ${{ env.BUILD_SH }} "usermod -a -G wheel alarm --root /mnt"
           ${{ env.BUILD_SH }} "echo -n > /mnt/etc/machine-id"
           ${{ env.TARGET_SH }} "systemctl enable $(cat services.md)"
