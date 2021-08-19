@@ -85,7 +85,7 @@ jobs:
           LANG=C
           LANGUAGE=
           ${{ env.BUILD_SH }} "rm -rf /mnt/etc/*- /mnt/root/.bash_history /mnt/root/.gnupg /mnt/var/log/* /mnt/var/lib/systemd/* "
-          ${{ env.BUILD_SH }} "bsdtar --exclude 'lost+found' -czpf /${{ env.IMG_NAME }}.tar.gz -C /mnt/ ."
+          ${{ env.BUILD_SH }} "bsdtar --exclude 'lost+found' --exclude 'boot/System Volume Information' -czpf /${{ env.IMG_NAME }}.tar.gz -C /mnt/ ."
         shell: bash
 
       - name: create and enable resize2fs_once service
