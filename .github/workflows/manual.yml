@@ -100,7 +100,6 @@ jobs:
         run: |
           ${{ env.BUILD_SH }} "rm -rf /mnt/etc/*- /mnt/root/.bash_history /mnt/root/.gnupg /mnt/var/log/* /mnt/var/lib/systemd/* "
           ${{ env.BUILD_SH }} "umount -R /mnt"
-          ${{ env.BUILD_SH }} "tune2fs -O has_journal ${{ env.V_SD }}p2"
           sudo losetup -d ${{ env.V_SD }}
           zip ${{ env.IMG_NAME }}.img.zip ${{ env.IMG_NAME }}.img
         shell: bash
