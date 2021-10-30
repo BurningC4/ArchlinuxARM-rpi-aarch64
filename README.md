@@ -36,8 +36,8 @@
 
   [Service]
   Type=oneshot
-  ExecStart=/usr/bin/growpart /dev/mmcblk0 2 ; /usr/sbin/resize2fs /dev/mmcblk0p2
-  ExecStartPost=/usr/bin/systemctl disable resize2fs_once.service ; /usr/bin/rm -rf /etc/systemd/system/resize2fs_once.service /usr/lib/init_resize /usr/bin/growpart
+  ExecStart=/usr/local/bin/growpart /dev/mmcblk0 2 ; /usr/sbin/resize2fs /dev/mmcblk0p2
+  ExecStartPost=/usr/bin/systemctl disable resize2fs_once.service ; /usr/bin/rm -rf /etc/systemd/system/resize2fs_once.service /usr/local/bin/growpart
 
   [Install]
   WantedBy=multi-user.target
