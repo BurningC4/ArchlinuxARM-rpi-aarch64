@@ -15,7 +15,7 @@
  ## 安装了以下软件包及其依赖
 
   ```
-  base linux-raspberrypi4 raspberrypi-bootloader raspberrypi-bootloader-x crda dhcpcd dialog haveged iptables-nft nano net-tools netctl openssh rpi-eeprom vi which wireless_tools wpa_supplicant
+  base linux-rpi raspberrypi-bootloader raspberrypi-bootloader-x crda dhcpcd dialog haveged iptables-nft nano net-tools netctl openssh rpi-eeprom vi which wireless_tools wpa_supplicant
   ```
 
  ## 启用了以下服务
