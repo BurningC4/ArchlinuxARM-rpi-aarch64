@@ -1,4 +1,4 @@
-name: Build rpi4 archlinuxarm
+name: Build rpi archlinuxarm
 
 on:
   workflow_dispatch:
@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     env: 
       BUILD_SH: 'sudo arch-chroot ./builder qemu-aarch64-static /usr/bin/bash -c'
-      IMG_NAME: 'ArchLinuxARM-rpi-4-aarch64-latest'
+      IMG_NAME: 'ArchLinuxARM-rpi-aarch64-latest'
 
     steps:
       - name: checkout repo
@@ -125,7 +125,7 @@ jobs:
           body: |
             ${{ env.RELEASE  }}
 
-      - name: Upload ArchLinuxARM-rpi-4-aarch64-latest.tar.gz
+      - name: Upload ArchLinuxARM-rpi-aarch64-latest.tar.gz
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -135,7 +135,7 @@ jobs:
           asset_name: ${{ env.IMG_NAME }}.tar.gz
           asset_content_type: application/gzip
 
-      - name: Upload ArchLinuxARM-rpi-4-aarch64-latest.tar.gz.sha256sum
+      - name: Upload ArchLinuxARM-rpi-aarch64-latest.tar.gz.sha256sum
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -145,7 +145,7 @@ jobs:
           asset_name: ${{ env.IMG_NAME }}.tar.gz.sha256sum
           asset_content_type: text/plain
 
-      - name: Upload ArchLinuxARM-rpi-4-aarch64-latest.img.zip
+      - name: Upload ArchLinuxARM-rpi-aarch64-latest.img.zip
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -155,7 +155,7 @@ jobs:
           asset_name: ${{ env.IMG_NAME }}.img.zip
           asset_content_type: application/gzip
 
-      - name: Upload ArchLinuxARM-rpi-4-aarch64-latest.tar.gz.sha256sum
+      - name: Upload ArchLinuxARM-rpi-aarch64-latest.tar.gz.sha256sum
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
