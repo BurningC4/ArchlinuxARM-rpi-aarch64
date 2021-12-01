@@ -4,13 +4,13 @@
  ## 下载地址
 
 - **ArchLinuxARM-rpi-aarch64-latest.img.zip**：
-  - https://github.com/BurningC4/ArchlinuxARM-rpi-aarch64/releases/latest/download/ArchLinuxARM-rpi-4-aarch64-latest.img.zip
+  - https://github.com/BurningC4/ArchlinuxARM-rpi-aarch64/releases/latest/download/ArchLinuxARM-rpi-aarch64-latest.img.zip
 - **ArchLinuxARM-rpi-aarch64-latest.img.zip.sha256sum**：
-  - https://github.com/BurningC4/ArchlinuxARM-rpi-aarch64/releases/latest/download/ArchLinuxARM-rpi-4-aarch64-latest.img.zip.sha256sum
+  - https://github.com/BurningC4/ArchlinuxARM-rpi-aarch64/releases/latest/download/ArchLinuxARM-rpi-aarch64-latest.img.zip.sha256sum
 - **ArchLinuxARM-rpi-aarch64-latest.tar.gz**：
-  - https://github.com/BurningC4/ArchlinuxARM-rpi-aarch64/releases/latest/download/ArchLinuxARM-rpi-4-aarch64-latest.tar.gz
+  - https://github.com/BurningC4/ArchlinuxARM-rpi-aarch64/releases/latest/download/ArchLinuxARM-rpi-aarch64-latest.tar.gz
 - **ArchLinuxARM-rpi-aarch64-latest.tar.gz.sha256sum**：
-  - https://github.com/BurningC4/ArchlinuxARM-rpi-aarch64/releases/latest/download/ArchLinuxARM-rpi-4-aarch64-latest.tar.gz.sha256sum
+  - https://github.com/BurningC4/ArchlinuxARM-rpi-aarch64/releases/latest/download/ArchLinuxARM-rpi-aarch64-latest.tar.gz.sha256sum
 
  ## 安装了以下软件包及其依赖
 
