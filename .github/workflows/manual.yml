@@ -49,7 +49,7 @@ jobs:
           sudo mkfs.ext4 ${{ env.V_SD }}p2
           ${{ env.BUILD_SH }} "tune2fs -O ^has_journal ${{ env.V_SD }}p2"
           ${{ env.BUILD_SH }} "mount ${{ env.V_SD }}p2 /mnt"
-          ${{ env.BUILD_SH }} "root mkdir -p /mnt/boot"
+          ${{ env.BUILD_SH }} "mkdir -p /mnt/boot"
           ${{ env.BUILD_SH }} "mount ${{ env.V_SD }}p1 /mnt/boot"
         shell: bash
 
