@@ -76,7 +76,8 @@ jobs:
           ${{ env.BUILD_SH }} "echo -e 'root:root\nalarm:alarm' | chpasswd --root /mnt"
           ${{ env.BUILD_SH }} "usermod -a -G wheel alarm --root /mnt"
           ${{ env.BUILD_SH }} "echo -n > /mnt/etc/machine-id"
-          ${{ env.TARGET_SH }} "systemctl enable $(cat services.md)"
+          ${{ env.BUILD_SH }} "systemctl --root=/mnt enable $(cat services.md)"
+          ${{ env.BUILD_SH }} "ls -l /mnt/etc/systemd/system/multi-user.target.wants"
         shell: bash
 
       - name: clean and create compressed file
@@ -93,7 +94,7 @@ jobs:
           ${{ env.BUILD_SH }} "cp -f /usr/bin/growpart /mnt/usr/local/bin/growpart"
           ${{ env.BUILD_SH }} "curl -L -o /mnt/etc/systemd/system/resize2fs_once.service https://github.com/BurningC4/ArchlinuxARM-rpi4-aarch64/raw/main/resize2fs_once.service"
           ${{ env.BUILD_SH }} "chmod a+x /mnt/usr/local/bin/growpart"
-          ${{ env.TARGET_SH }} "systemctl enable resize2fs_once"
+          ${{ env.BUILD_SH }} "systemctl --root=/mnt enable resize2fs_once.service"
         shell: bash
 
       - name: clean and package img file
