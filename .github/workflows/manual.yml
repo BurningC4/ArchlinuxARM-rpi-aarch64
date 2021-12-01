@@ -15,18 +15,9 @@ jobs:
     runs-on: ubuntu-latest
     env: 
       BUILD_SH: 'sudo arch-chroot ./builder qemu-aarch64-static /usr/bin/bash -c'
-      TARGET_SH: 'sudo arch-chroot ./builder qemu-aarch64-static /usr/bin/bash arch-chroot /mnt /usr/bin/bash -c'
       IMG_NAME: 'ArchLinuxARM-rpi-4-aarch64-latest'
 
     steps:
-      - name: delete old release
-        uses: dev-drprasad/delete-tag-and-release@v0.2.0
-        with:
-          delete_release: true
-          tag_name: latest
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
       - name: checkout repo
         uses: actions/checkout@v2
 
@@ -76,8 +67,16 @@ jobs:
           ${{ env.BUILD_SH }} "echo -e 'root:root\nalarm:alarm' | chpasswd --root /mnt"
           ${{ env.BUILD_SH }} "usermod -a -G wheel alarm --root /mnt"
           ${{ env.BUILD_SH }} "echo -n > /mnt/etc/machine-id"
-          ${{ env.TARGET_SH }} "systemctl enable $(cat services.md)"
+          ${{ env.BUILD_SH }} "systemctl --root=/mnt enable $(cat services.md)"
         shell: bash
+
+      - name: delete old release
+        uses: dev-drprasad/delete-tag-and-release@v0.2.0
+        with:
+          delete_release: true
+          tag_name: latest
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: clean and create compressed file
         run: |
@@ -93,7 +92,7 @@ jobs:
           ${{ env.BUILD_SH }} "cp -f /usr/bin/growpart /mnt/usr/local/bin/growpart"
           ${{ env.BUILD_SH }} "curl -L -o /mnt/etc/systemd/system/resize2fs_once.service https://github.com/BurningC4/ArchlinuxARM-rpi4-aarch64/raw/main/resize2fs_once.service"
           ${{ env.BUILD_SH }} "chmod a+x /mnt/usr/local/bin/growpart"
-          ${{ env.TARGET_SH }} "systemctl enable resize2fs_once"
+          ${{ env.BUILD_SH }} "systemctl --root=/mnt enable resize2fs_once.service"
         shell: bash
 
       - name: clean and package img file
