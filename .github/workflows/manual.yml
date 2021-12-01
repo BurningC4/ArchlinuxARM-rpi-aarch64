@@ -35,7 +35,7 @@ jobs:
           sudo bsdtar -xpf ./ArchLinuxARM-aarch64-latest.tar.gz -C ./builder
           sudo cp /usr/bin/qemu-aarch64-static ./builder/usr/bin/qemu-aarch64-static
           sudo cp -f ./pacman.conf ./builder/etc/pacman.conf
-          ${{ env.BUILD_SH }} "pacman -Syyu --ask=4 arch-install-scripts cloud-guest-utils"
+          ${{ env.BUILD_SH }} "pacman -Syy --ask=4 arch-install-scripts cloud-guest-utils"
         shell: bash
 
       - name: prepare image file
@@ -90,7 +90,7 @@ jobs:
       - name: create and enable resize2fs_once service
         run: |
           ${{ env.BUILD_SH }} "cp -f /usr/bin/growpart /mnt/usr/local/bin/growpart"
-          ${{ env.BUILD_SH }} "curl -L -o /mnt/etc/systemd/system/resize2fs_once.service https://github.com/BurningC4/ArchlinuxARM-rpi4-aarch64/raw/main/resize2fs_once.service"
+          ${{ env.BUILD_SH }} "curl -L -o /mnt/etc/systemd/system/resize2fs_once.service https://github.com/BurningC4/ArchlinuxARM-rpi-aarch64/raw/main/resize2fs_once.service"
           ${{ env.BUILD_SH }} "chmod a+x /mnt/usr/local/bin/growpart"
           ${{ env.BUILD_SH }} "systemctl --root=/mnt enable resize2fs_once.service"
         shell: bash
