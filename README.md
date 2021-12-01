@@ -4,13 +4,13 @@
  ## 下载地址
 
 - **ArchLinuxARM-rpi-4-aarch64-latest.img.zip**：
-  - https://github.com/BurningC4/ArchlinuxARM-rpi4-aarch64-builder/releases/latest/download/ArchLinuxARM-rpi-4-aarch64-latest.img.zip
+  - https://github.com/BurningC4/ArchlinuxARM-rpi4-aarch64/releases/latest/download/ArchLinuxARM-rpi-4-aarch64-latest.img.zip
 - **ArchLinuxARM-rpi-4-aarch64-latest.img.zip.sha256sum**：
-  - https://github.com/BurningC4/ArchlinuxARM-rpi4-aarch64-builder/releases/latest/download/ArchLinuxARM-rpi-4-aarch64-latest.img.zip.sha256sum
+  - https://github.com/BurningC4/ArchlinuxARM-rpi4-aarch64/releases/latest/download/ArchLinuxARM-rpi-4-aarch64-latest.img.zip.sha256sum
 - **ArchLinuxARM-rpi-4-aarch64-latest.tar.gz**：
-  - https://github.com/BurningC4/ArchlinuxARM-rpi4-aarch64-builder/releases/latest/download/ArchLinuxARM-rpi-4-aarch64-latest.tar.gz
+  - https://github.com/BurningC4/ArchlinuxARM-rpi4-aarch64/releases/latest/download/ArchLinuxARM-rpi-4-aarch64-latest.tar.gz
 - **ArchLinuxARM-rpi-4-aarch64-latest.tar.gz.sha256sum**：
-  - https://github.com/BurningC4/ArchlinuxARM-rpi4-aarch64-builder/releases/latest/download/ArchLinuxARM-rpi-4-aarch64-latest.tar.gz.sha256sum
+  - https://github.com/BurningC4/ArchlinuxARM-rpi4-aarch64/releases/latest/download/ArchLinuxARM-rpi-4-aarch64-latest.tar.gz.sha256sum
 
  ## 安装了以下软件包及其依赖
 
@@ -24,8 +24,8 @@
   haveged sshd systemd-networkd systemd-resolved systemd-timesyncd
   ```
 
-  基本相当于官方 **rpi-aarch64** 镜像安装了 **linux-raspberrypi4** 和 **raspberrypi-bootloader-x**
-  
+  基本相当于官方 **rpi-aarch64** 镜像安装了 **linux-rpi** 和 **raspberrypi-bootloader-x**
+
   ### IMG文件的额外订制
   
   添加并启用了 **resize2fs_once.service**
