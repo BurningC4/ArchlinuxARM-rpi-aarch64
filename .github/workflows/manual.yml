@@ -47,10 +47,10 @@ jobs:
           sudo parted -s ${{ env.V_SD }} mkpart primary ext4 411648s 7812499s
           sudo mkfs.vfat -F 32 ${{ env.V_SD }}p1
           sudo mkfs.ext4 ${{ env.V_SD }}p2
-          ${{ env.BUILD_SH }} "tune2fs -O ^has_journal ${{ env.V_SD }}p2"
-          ${{ env.BUILD_SH }} "mount ${{ env.V_SD }}p2 /mnt"
+          sudo tune2fs -O ^has_journal ${{ env.V_SD }}p2
+          sudo mount ${{ env.V_SD }}p2 ./builder/mnt
           ${{ env.BUILD_SH }} "mkdir -p /mnt/boot"
-          ${{ env.BUILD_SH }} "mount ${{ env.V_SD }}p1 /mnt/boot"
+          sudo mount ${{ env.V_SD }}p1 ./builder/mnt/boot
         shell: bash
 
       - name: generate target
@@ -98,7 +98,7 @@ jobs:
       - name: clean and package img file
         run: |
           ${{ env.BUILD_SH }} "rm -rf /mnt/etc/*- /mnt/root/.bash_history /mnt/root/.gnupg /mnt/var/log/* /mnt/var/lib/systemd/* "
-          ${{ env.BUILD_SH }} "umount -R /mnt"
+          sudo umount -R ./builder/mnt
           sudo losetup -d ${{ env.V_SD }}
           zip ${{ env.IMG_NAME }}.img.zip ${{ env.IMG_NAME }}.img
         shell: bash
