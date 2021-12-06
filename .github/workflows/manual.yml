@@ -38,7 +38,7 @@ jobs:
           ${{ env.BUILD_SH }} "pacman -Syy --ask=4 arch-install-scripts cloud-guest-utils"
         shell: bash
 
-      - name: prepare image file
+      - name: prepare img file
         run: |
           dd if=/dev/zero of=${{ env.IMG_NAME }}.img bs=4K count=512K
           sudo losetup --partscan ${{ env.V_SD }} ${{ env.IMG_NAME }}.img
@@ -95,7 +95,7 @@ jobs:
           zip ${{ env.IMG_NAME }}.img.zip ${{ env.IMG_NAME }}.img
         shell: bash
 
-      - name: generate release
+      - name: prepare release files
         run: |
           mkdir ./release
           sudo mv ./builder/${{ env.IMG_NAME }}.tar.gz ./release/${{ env.IMG_NAME }}.tar.gz
@@ -104,7 +104,7 @@ jobs:
           sha256sum ./release/${{ env.IMG_NAME }}.img.zip > ./release/${{ env.IMG_NAME }}.img.zip.sha256sum
         shell: bash
 
-      - name: Create a release
+      - name: create a release
         id: create_release
         uses: actions/create-release@v1
         env:
@@ -117,7 +117,7 @@ jobs:
           body: |
             ${{ env.RELEASE }}
 
-      - name: Upload ArchLinuxARM-rpi-aarch64-latest.tar.gz
+      - name: upload ArchLinuxARM-rpi-aarch64-latest.tar.gz
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -127,7 +127,7 @@ jobs:
           asset_name: ${{ env.IMG_NAME }}.tar.gz
           asset_content_type: application/gzip
 
-      - name: Upload ArchLinuxARM-rpi-aarch64-latest.tar.gz.sha256sum
+      - name: upload ArchLinuxARM-rpi-aarch64-latest.tar.gz.sha256sum
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -137,7 +137,7 @@ jobs:
           asset_name: ${{ env.IMG_NAME }}.tar.gz.sha256sum
           asset_content_type: text/plain
 
-      - name: Upload ArchLinuxARM-rpi-aarch64-latest.img.zip
+      - name: upload ArchLinuxARM-rpi-aarch64-latest.img.zip
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -147,7 +147,7 @@ jobs:
           asset_name: ${{ env.IMG_NAME }}.img.zip
           asset_content_type: application/gzip
 
-      - name: Upload ArchLinuxARM-rpi-aarch64-latest.tar.gz.sha256sum
+      - name: upload ArchLinuxARM-rpi-aarch64-latest.tar.gz.sha256sum
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -157,7 +157,7 @@ jobs:
           asset_name: ${{ env.IMG_NAME }}.img.zip.sha256sum
           asset_content_type: text/plain
 
-      - name:Delete Old Releases
+      - name: delete old releases
         uses: dev-drprasad/delete-older-releases@v0.2.0
         with:
           keep_latest: 1
