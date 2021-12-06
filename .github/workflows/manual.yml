@@ -70,14 +70,6 @@ jobs:
           ${{ env.BUILD_SH }} "systemctl --root=/mnt enable $(cat services.md)"
         shell: bash
 
-      - name: delete old release
-        uses: dev-drprasad/delete-tag-and-release@v0.2.0
-        with:
-          delete_release: true
-          tag_name: latest
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
       - name: clean and create compressed file
         run: |
           LC_ALL=C
@@ -118,12 +110,12 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: latest
-          release_name: latest
+          tag_name: ${{ env.RELEASE }}
+          release_name: ${{ env.RELEASE }}
           draft: false
           prerelease: false
           body: |
-            ${{ env.RELEASE  }}
+            ${{ env.RELEASE }}
 
       - name: Upload ArchLinuxARM-rpi-aarch64-latest.tar.gz
         uses: actions/upload-release-asset@v1
@@ -164,3 +156,10 @@ jobs:
           asset_path: ./release/${{ env.IMG_NAME }}.img.zip.sha256sum
           asset_name: ${{ env.IMG_NAME }}.img.zip.sha256sum
           asset_content_type: text/plain
+
+      - name:Delete Old Releases
+        uses: dev-drprasad/delete-older-releases@v0.2.0
+        with:
+          keep_latest: 1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
