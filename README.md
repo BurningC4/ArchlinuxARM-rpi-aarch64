@@ -1,5 +1,6 @@
 # 简介
-本项目用于每天自动生成 **树莓派** 的 **ArchLinuxARM** **aarch64** 系统镜像
+- 本项目用于每天自动生成 **树莓派** 的 **ArchLinuxARM** **aarch64** 系统镜像
+- 生成的镜像包含树莓派官方的闭源固件
 
  ## 下载地址
 
@@ -17,6 +18,7 @@
   ```
   base linux-rpi raspberrypi-bootloader raspberrypi-bootloader-x crda dhcpcd dialog haveged iptables-nft nano net-tools netctl openssh rpi-eeprom vi which wireless_tools wpa_supplicant
   ```
+  
 
  ## 启用了以下服务
 
