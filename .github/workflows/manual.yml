@@ -49,7 +49,7 @@ jobs:
           sudo mkfs.ext4 ${{ env.V_SD }}p2
           sudo tune2fs -O ^has_journal ${{ env.V_SD }}p2
           sudo mount ${{ env.V_SD }}p2 ./builder/mnt
-          ${{ env.BUILD_SH }} "mkdir -p /mnt/boot"
+          sudo mkdir -p ./builder/mnt/boot
           sudo mount ${{ env.V_SD }}p1 ./builder/mnt/boot
         shell: bash
 
@@ -75,8 +75,8 @@ jobs:
           LC_ALL=C
           LANG=C
           LANGUAGE=
-          ${{ env.BUILD_SH }} "rm -rf /mnt/etc/*- /mnt/root/.bash_history /mnt/root/.gnupg /mnt/var/log/* /mnt/var/lib/systemd/* "
-          ${{ env.BUILD_SH }} "bsdtar --exclude 'lost+found' --exclude 'boot/System Volume Information' -czpf /${{ env.IMG_NAME }}.tar.gz -C /mnt/ ."
+          sudo rm -rf ./builder/mnt/etc/*- ./builder/mnt/root/.bash_history ./builder/mnt/root/.gnupg ./builder/mnt/var/log/* ./builder/mnt/var/lib/systemd/*
+          sudo bsdtar --exclude 'lost+found' --exclude 'boot/System Volume Information' -czpf ./${{ env.IMG_NAME }}.tar.gz -C ./builder/mnt/ .
         shell: bash
 
       - name: create and enable resize2fs_once service
@@ -97,11 +97,8 @@ jobs:
 
       - name: prepare release files
         run: |
-          mkdir ./release
-          sudo mv ./builder/${{ env.IMG_NAME }}.tar.gz ./release/${{ env.IMG_NAME }}.tar.gz
-          sudo mv ./${{ env.IMG_NAME }}.img.zip ./release/${{ env.IMG_NAME }}.img.zip
-          sha256sum ./release/${{ env.IMG_NAME }}.tar.gz > ./release/${{ env.IMG_NAME }}.tar.gz.sha256sum
-          sha256sum ./release/${{ env.IMG_NAME }}.img.zip > ./release/${{ env.IMG_NAME }}.img.zip.sha256sum
+          sha256sum ${{ env.IMG_NAME }}.tar.gz > ./${{ env.IMG_NAME }}.tar.gz.sha256sum
+          sha256sum ${{ env.IMG_NAME }}.img.zip > ./${{ env.IMG_NAME }}.img.zip.sha256sum
         shell: bash
 
       - name: create a release
@@ -123,7 +120,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./release/${{ env.IMG_NAME }}.tar.gz
+          asset_path: ./${{ env.IMG_NAME }}.tar.gz
           asset_name: ${{ env.IMG_NAME }}.tar.gz
           asset_content_type: application/gzip
 
@@ -133,7 +130,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./release/${{ env.IMG_NAME }}.tar.gz.sha256sum
+          asset_path: ./${{ env.IMG_NAME }}.tar.gz.sha256sum
           asset_name: ${{ env.IMG_NAME }}.tar.gz.sha256sum
           asset_content_type: text/plain
 
@@ -143,7 +140,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./release/${{ env.IMG_NAME }}.img.zip
+          asset_path: ./${{ env.IMG_NAME }}.img.zip
           asset_name: ${{ env.IMG_NAME }}.img.zip
           asset_content_type: application/gzip
 
@@ -153,7 +150,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./release/${{ env.IMG_NAME }}.img.zip.sha256sum
+          asset_path: ./${{ env.IMG_NAME }}.img.zip.sha256sum
           asset_name: ${{ env.IMG_NAME }}.img.zip.sha256sum
           asset_content_type: text/plain
 
