@@ -24,7 +24,7 @@ jobs:
       - name: Set variables
         run: |
           echo V_SD=$(losetup -f) >> $GITHUB_ENV
-          echo RELEASE=$(date +%Y%m%d) >> $GITHUB_ENV
+          echo RELEASE=$(date +%Y\/%m\/%d) >> $GITHUB_ENV
         shell: bash
 
       - name: generate builder
