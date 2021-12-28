@@ -76,7 +76,7 @@ jobs:
           LANG=C
           LANGUAGE=
           sudo rm -rf ./builder/mnt/etc/*- ./builder/mnt/root/.bash_history ./builder/mnt/root/.gnupg ./builder/mnt/var/log/* ./builder/mnt/var/lib/systemd/*
-          ${{ env.BUILD_SH }} "bsdtar --exclude 'lost+found' --exclude 'boot/System Volume Information' -vczf /${{ env.IMG_NAME }}.tar.gz -C /mnt/ ."
+          ${{ env.BUILD_SH }} "bsdtar --exclude 'lost+found' --exclude 'boot/System Volume Information' -czf /${{ env.IMG_NAME }}.tar.gz -C /mnt/ ."
           sudo mv ./builder/${{ env.IMG_NAME }}.tar.gz ./${{ env.IMG_NAME }}.tar.gz
         shell: bash
 
