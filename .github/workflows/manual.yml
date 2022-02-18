@@ -36,7 +36,7 @@ jobs:
           sudo mount --bind ./builder ./builder
           sudo cp /usr/bin/qemu-aarch64-static ./builder/usr/bin/qemu-aarch64-static
           sudo cp -f ./pacman.conf ./builder/etc/pacman.conf
-          ${{ env.BUILD_SH }} "pacman -Syy --ask=4 arch-install-scripts cloud-guest-utils"
+          ${{ env.BUILD_SH }} "pacman -Syyu --ask=4 arch-install-scripts cloud-guest-utils"
         shell: bash
 
       - name: prepare img file
