@@ -64,7 +64,7 @@ jobs:
           ${{ env.BUILD_SH }} "echo '/dev/mmcblk0p1  /boot   vfat    defaults        0       0'>>/mnt/etc/fstab"
           ${{ env.BUILD_SH }} "echo 'alarm'>/mnt/etc/hostname"
           ${{ env.BUILD_SH }} "echo 'LANG=C'>/mnt/etc/locale.conf"
-          ${{ env.BUILD_SH }} "cat /mnt/etc/group"
+          ${{ env.BUILD_SH }} "cat /mnt/etc/pam.d/chpasswd"
           ${{ env.BUILD_SH }} "useradd -d /home/alarm -m -U alarm --root /mnt"
           ${{ env.BUILD_SH }} "echo -e 'root:root\nalarm:alarm' | chpasswd --root /mnt"
           ${{ env.BUILD_SH }} "usermod -a -G wheel alarm --root /mnt"
