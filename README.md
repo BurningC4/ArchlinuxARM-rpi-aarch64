@@ -16,7 +16,7 @@
  ## 安装了以下软件包及其依赖
 
   ```
-  base linux-rpi raspberrypi-bootloader raspberrypi-bootloader-x crda dhcpcd dialog haveged iptables-nft nano net-tools netctl openssh rpi-eeprom vi which wireless_tools wpa_supplicant
+  base linux-rpi raspberrypi-bootloader crda dhcpcd dialog haveged iptables-nft nano net-tools netctl openssh rpi-eeprom vi which wireless_tools wpa_supplicant
   ```
   
 
@@ -26,7 +26,7 @@
   haveged sshd systemd-networkd systemd-resolved systemd-timesyncd
   ```
 
-  基本相当于官方 **rpi-aarch64** 镜像安装了 **linux-rpi** 和 **raspberrypi-bootloader-x**
+  基本相当于官方 **rpi-aarch64** 镜像安装了 **linux-rpi**
 
   ### IMG文件的额外订制
   
