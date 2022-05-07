@@ -95,7 +95,7 @@ jobs:
           ${{ env.BUILD_SH }} "rm -rf /mnt/etc/*- /mnt/root/.bash_history /mnt/root/.gnupg /mnt/var/log/* /mnt/var/lib/systemd/* "
           sudo umount -R ./builder/mnt
           sudo tune2fs -M / ${{ env.V_SD }}p2
-          sudo e2fsck -yf ${{ env.V_SD }}p2
+          sudo e2fsck -yf -E discard ${{ env.V_SD }}p2
           sudo resize2fs -M ${{ env.V_SD }}p2
           sudo e2fsck -yf ${{ env.V_SD }}p2
           IMG_END=$(sudo fdisk -l -o end ${{ env.V_SD }} | sed -n '$p')
