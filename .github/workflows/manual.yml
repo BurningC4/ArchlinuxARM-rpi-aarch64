@@ -78,8 +78,7 @@ jobs:
           LANG=C
           LANGUAGE=
           sudo rm -rf ./builder/mnt/etc/*- ./builder/mnt/root/.bash_history ./builder/mnt/root/.gnupg ./builder/mnt/var/log/* ./builder/mnt/var/lib/systemd/*
-          ${{ env.BUILD_SH }} "bsdtar --exclude 'lost+found' --exclude 'boot/System Volume Information' -czf /${{ env.IMG_NAME }}.tar.gz -C /mnt/ ."
-          sudo mv ./builder/${{ env.IMG_NAME }}.tar.gz ./${{ env.IMG_NAME }}.tar.gz
+          bsdtar --numeric-owner --exclude 'lost+found' --exclude 'boot/System Volume Information' -czf ./${{ env.IMG_NAME }}.tar.gz -C ./builder/mnt/ .
         shell: bash
 
       - name: create and enable resize2fs_once service
@@ -110,58 +109,20 @@ jobs:
           sha256sum ${{ env.IMG_NAME }}.img.zip > ./${{ env.IMG_NAME }}.img.zip.sha256sum
         shell: bash
 
-      - name: create a release
-        id: create_release
-        uses: actions/create-release@v1
+      - name: create release
+        uses: softprops/action-gh-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
+          body: ${{ env.RELEASE }}
           tag_name: ${{ env.RELEASE }}
-          release_name: ${{ env.RELEASE }}
           draft: false
           prerelease: false
-          body: |
-            ${{ env.RELEASE }}
-
-      - name: upload ArchLinuxARM-rpi-aarch64-latest.tar.gz
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./${{ env.IMG_NAME }}.tar.gz
-          asset_name: ${{ env.IMG_NAME }}.tar.gz
-          asset_content_type: application/gzip
-
-      - name: upload ArchLinuxARM-rpi-aarch64-latest.tar.gz.sha256sum
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./${{ env.IMG_NAME }}.tar.gz.sha256sum
-          asset_name: ${{ env.IMG_NAME }}.tar.gz.sha256sum
-          asset_content_type: text/plain
-
-      - name: upload ArchLinuxARM-rpi-aarch64-latest.img.zip
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./${{ env.IMG_NAME }}.img.zip
-          asset_name: ${{ env.IMG_NAME }}.img.zip
-          asset_content_type: application/gzip
-
-      - name: upload ArchLinuxARM-rpi-aarch64-latest.tar.gz.sha256sum
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./${{ env.IMG_NAME }}.img.zip.sha256sum
-          asset_name: ${{ env.IMG_NAME }}.img.zip.sha256sum
-          asset_content_type: text/plain
+          files: |
+            ./${{ env.IMG_NAME }}.tar.gz
+            ./${{ env.IMG_NAME }}.tar.gz.sha256sum
+            ./${{ env.IMG_NAME }}.img.zip
+            ./${{ env.IMG_NAME }}.img.zip.sha256sum
 
       - name: delete old releases
         uses: dev-drprasad/delete-older-releases@v0.2.0
