@@ -57,9 +57,9 @@ jobs:
 
       - name: generate target
         run: |
-          ${{ env.BUILD_SH }} "pacstrap -cGM /mnt $(cat packages.md) 2>&1" 2>&1
-          ${{ env.BUILD_SH }} "rm /mnt/etc/resolv.conf"
-          ${{ env.BUILD_SH }} "ln -s /run/systemd/resolve/resolv.conf /mnt/etc/resolv.conf"
+          ${{ env.BUILD_SH }} "pacstrap -cGM /mnt $(cat packages.md)"
+          ${{ env.BUILD_SH }} "rm -f /mnt/etc/resolv.conf"
+          ${{ env.BUILD_SH }} "ln -sf /run/systemd/resolve/resolv.conf /mnt/etc/resolv.conf"
           ${{ env.BUILD_SH }} "echo -e '[Match]\nName=en*\n\n[Network]\nDHCP=yes\nDNSSEC=no'>/mnt/etc/systemd/network/en.network"
           ${{ env.BUILD_SH }} "echo -e '[Match]\nName=eth*\n\n[Network]\nDHCP=yes\nDNSSEC=no'>/mnt/etc/systemd/network/eth.network"
           ${{ env.BUILD_SH }} "echo '/dev/mmcblk0p1  /boot   vfat    defaults        0       0'>>/mnt/etc/fstab"
