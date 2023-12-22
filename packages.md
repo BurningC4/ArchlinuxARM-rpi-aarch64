@@ -1,1 +1,1 @@
-base linux-rpi raspberrypi-bootloader crda dhcpcd dialog haveged iptables-nft nano net-tools netctl openssh rpi-eeprom systemd-resolvconf vi which wireless_tools wpa_supplicant
+archlinuxarm-keyring base dhcpcd dialog firmware-raspberrypi linux-rpi nano net-tools netctl openssh raspberrypi-bootloader uboot-raspberrypi vi which wireless-regdb wireless_tools wpa_supplicant
