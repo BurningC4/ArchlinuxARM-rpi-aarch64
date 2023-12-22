@@ -14,7 +14,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env: 
-      BUILD_SH: 'sudo arch-chroot ./builder qemu-aarch64-static /usr/bin/bash --debug -c'
+      BUILD_SH: 'sudo arch-chroot ./builder qemu-aarch64-static /usr/bin/bash -c'
       IMG_NAME: 'ArchLinuxARM-rpi-aarch64-latest'
 
     steps:
@@ -57,19 +57,33 @@ jobs:
 
       - name: generate target
         run: |
+          echo 0
           ${{ env.BUILD_SH }} "pacstrap -cGM /mnt $(cat packages.md)"
+          echo 1
           ${{ env.BUILD_SH }} "rm -f /mnt/etc/resolv.conf"
+          echo 2
           ${{ env.BUILD_SH }} "ln -sf /run/systemd/resolve/resolv.conf /mnt/etc/resolv.conf"
+          echo 3
           ${{ env.BUILD_SH }} "echo -e '[Match]\nName=en*\n\n[Network]\nDHCP=yes\nDNSSEC=no'>/mnt/etc/systemd/network/en.network"
+          echo 4
           ${{ env.BUILD_SH }} "echo -e '[Match]\nName=eth*\n\n[Network]\nDHCP=yes\nDNSSEC=no'>/mnt/etc/systemd/network/eth.network"
+          echo 5
           ${{ env.BUILD_SH }} "echo '/dev/mmcblk0p1  /boot   vfat    defaults        0       0'>>/mnt/etc/fstab"
+          echo 6
           ${{ env.BUILD_SH }} "echo 'alarm'>/mnt/etc/hostname"
+          echo 7
           ${{ env.BUILD_SH }} "echo 'LANG=C'>/mnt/etc/locale.conf"
+          echo 8
           ${{ env.BUILD_SH }} "useradd -d /home/alarm -m -U alarm --root /mnt"
+          echo 9
           ${{ env.BUILD_SH }} "echo -e 'root:root\nalarm:alarm' | chpasswd --root /mnt"
+          echo 10
           ${{ env.BUILD_SH }} "usermod -a -G wheel alarm --root /mnt"
+          echo 11
           ${{ env.BUILD_SH }} "echo -n > /mnt/etc/machine-id"
+          echo 12
           ${{ env.BUILD_SH }} "systemctl --root=/mnt enable $(cat services.md)"
+          echo 13
         shell: bash
 
       - name: clean and create compressed file
