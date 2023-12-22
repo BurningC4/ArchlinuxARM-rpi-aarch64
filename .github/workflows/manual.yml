@@ -14,7 +14,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env: 
-      BUILD_SH: 'sudo arch-chroot ./builder qemu-aarch64-static /usr/bin/bash -c'
+      BUILD_SH: 'sudo arch-chroot ./builder qemu-aarch64-static /usr/bin/bash --debug -c'
       IMG_NAME: 'ArchLinuxARM-rpi-aarch64-latest'
 
     steps:
@@ -57,7 +57,7 @@ jobs:
 
       - name: generate target
         run: |
-          ${{ env.BUILD_SH }} "pacstrap -cGM /mnt $(cat packages.md) && return 0"
+          ${{ env.BUILD_SH }} "pacstrap -cGM /mnt $(cat packages.md)"
           ${{ env.BUILD_SH }} "rm -f /mnt/etc/resolv.conf"
           ${{ env.BUILD_SH }} "ln -sf /run/systemd/resolve/resolv.conf /mnt/etc/resolv.conf"
           ${{ env.BUILD_SH }} "echo -e '[Match]\nName=en*\n\n[Network]\nDHCP=yes\nDNSSEC=no'>/mnt/etc/systemd/network/en.network"
