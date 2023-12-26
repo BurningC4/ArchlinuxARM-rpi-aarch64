@@ -16,14 +16,14 @@
  ## 安装了以下软件包及其依赖
 
   ```
-  base linux-rpi raspberrypi-bootloader crda dhcpcd dialog haveged iptables-nft nano net-tools netctl openssh rpi-eeprom vi which wireless_tools wpa_supplicant
+  archlinuxarm-keyring base dhcpcd dialog linux-rpi nano net-tools netctl openssh raspberrypi-bootloader firmware-raspberrypi vi which wireless-regdb wireless_tools wpa_supplicant
   ```
   
 
  ## 启用了以下服务
 
   ```
-  haveged sshd systemd-networkd systemd-resolved systemd-timesyncd
+  sshd systemd-networkd systemd-resolved systemd-timesyncd
   ```
 
   基本相当于官方 **rpi-aarch64** 镜像安装了 **linux-rpi**
